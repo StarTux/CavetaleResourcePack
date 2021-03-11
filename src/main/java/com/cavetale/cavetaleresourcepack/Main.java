@@ -12,6 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import org.bukkit.Material;
 
 public final class Main {
     static Random random = new Random();
@@ -74,15 +75,19 @@ public final class Main {
         Files.createDirectories(targetTexturesPath);
         for (ItemInfo itemInfo : mytemsMap.values()) {
             if (itemInfo.mytems == null) {
-                System.out.println("Mytem not found: " + itemInfo.name);
+                System.err.println("Mytem not found: " + itemInfo.name);
                 continue;
             }
-            if (itemInfo.modelPath == null) {
-                System.out.println("Missing model: " + itemInfo.name);
+            if (itemInfo.mytems.material == null) {
+                System.err.println("Mytems.material is null: " + itemInfo.mytems);
+                continue;
+            }
+            if (itemInfo.mytems.customModelData == null) {
+                System.err.println("Mytems.customModelData is null: " + itemInfo.mytems);
                 continue;
             }
             if (itemInfo.texturePath == null) {
-                System.out.println("Missing texture: " + itemInfo.name);
+                System.err.println("Missing texture: " + itemInfo.name);
                 continue;
             }
             if (obfuscate) {
@@ -92,7 +97,19 @@ public final class Main {
                 itemInfo.modelFileName = itemInfo.name;
                 itemInfo.textureFileName = itemInfo.name;
             }
-            if (obfuscate) {
+            if (itemInfo.modelPath == null) {
+                Map<String, Object> modelFileObject = new HashMap<>();
+                if (isHandheld(itemInfo.mytems.material)) {
+                    modelFileObject.put("parent", "minecraft:item/handheld");
+                } else {
+                    modelFileObject.put("parent", "minecraft:item/generated");
+                }
+                Map<String, Object> texturesMap = new HashMap<>();
+                modelFileObject.put("textures", texturesMap);
+                texturesMap.put("layer0", "mytems:item/" + itemInfo.textureFileName);
+                String modelJson = Json.serialize(modelFileObject);
+                Files.write(targetModelsPath.resolve(itemInfo.modelFileName + ".json"), modelJson.getBytes());
+            } else if (obfuscate) {
                 Map<String, Object> modelFileObject = (Map<String, Object>) Json.load(sourcePath.resolve(itemInfo.modelPath).toFile(), Map.class, () -> null);
                 String modelJson = Json.serialize(modelFileObject);
                 modelJson = modelJson.replace(itemInfo.name, itemInfo.textureFileName);
@@ -130,5 +147,51 @@ public final class Main {
             result = result + pool.charAt(random.nextInt(pool.length()));
         }
         return result;
+    }
+
+    static boolean isHandheld(Material mat) {
+        switch (mat) {
+        case BAMBOO:
+        case BLAZE_ROD:
+        case BONE:
+        case CARROT_ON_A_STICK:
+        case DEBUG_STICK:
+        case DIAMOND_AXE:
+        case DIAMOND_HOE:
+        case DIAMOND_PICKAXE:
+        case DIAMOND_SHOVEL:
+        case DIAMOND_SWORD:
+        case FISHING_ROD:
+        case GOLDEN_AXE:
+        case GOLDEN_HOE:
+        case GOLDEN_PICKAXE:
+        case GOLDEN_SHOVEL:
+        case GOLDEN_SWORD:
+        case IRON_AXE:
+        case IRON_HOE:
+        case IRON_PICKAXE:
+        case IRON_SHOVEL:
+        case IRON_SWORD:
+        case NETHERITE_AXE:
+        case NETHERITE_HOE:
+        case NETHERITE_PICKAXE:
+        case NETHERITE_SHOVEL:
+        case NETHERITE_SWORD:
+        case STICK:
+        case STONE_AXE:
+        case STONE_HOE:
+        case STONE_PICKAXE:
+        case STONE_SHOVEL:
+        case STONE_SWORD:
+        case WARPED_FUNGUS_ON_A_STICK:
+        case WOODEN_AXE:
+        case WOODEN_HOE:
+        case WOODEN_PICKAXE:
+        case WOODEN_SHOVEL:
+        case WOODEN_SWORD:
+            return true;
+        default:
+            return false;
+        }
     }
 }
