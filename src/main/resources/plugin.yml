@@ -1,0 +1,27 @@
+main: com.cavetale.cavetaleresourcepack.CavetaleResourcePackPlugin
+
+name: CavetaleResourcePack
+version: 0.1
+description: CavetaleResourcePack Plugin
+api-version: 1.13
+
+author: StarTux
+website: https://github.com/StarTux/CavetaleResourcePack
+
+depend: []
+softdepend: []
+
+commands:
+
+  cavetaleresourcepack:
+    aliases: []
+    description: CavetaleResourcePack Command
+    permission: cavetaleresourcepack.cavetaleresourcepack
+    usage: |-
+      /cavetaleresourcepack
+
+permissions:
+
+  cavetaleresourcepack.cavetaleresourcepack:
+    description: Use /cavetaleresourcepack
+    default: op

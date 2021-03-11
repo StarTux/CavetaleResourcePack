@@ -1,0 +1,11 @@
+{
+    "providers": [
+        {
+            "type": "bitmap",
+            "file": "mytems:emoji/kitty_coin.png",
+            "ascent": 12,
+            "height": 16,
+            "chars": ["\u26C2"]
+        }
+    ]
+}
