@@ -1,6 +1,7 @@
 package com.cavetale.cavetaleresourcepack;
 
 import com.cavetale.mytems.util.Json;
+import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.imageio.ImageIO;
 import org.bukkit.Material;
 
 public final class Main {
@@ -82,8 +84,10 @@ public final class Main {
                 public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
                     try {
                         Path relative = sourcePath.relativize(path);
-                        if (relative.getNameCount() == 1) {
-                            Files.copy(path, targetPath.resolve(relative), StandardCopyOption.REPLACE_EXISTING);
+                        if (relative.toString().equals("pack.png")) {
+                            copyPng(path, targetPath.resolve(relative));
+                        } else if (relative.toString().equals("pack.mcmeta")) {
+                            copyJson(path, targetPath.resolve(relative));
                         } else if (relative.getNameCount() > 1) {
                             Path directory = relative.getParent();
                             Path file = relative.getFileName();
@@ -155,8 +159,7 @@ public final class Main {
                 Files.copy(sourcePath.resolve(itemInfo.modelPath), targetModelsPath.resolve(itemInfo.modelFileName + ".json"),
                            StandardCopyOption.REPLACE_EXISTING);
             }
-            Files.copy(sourcePath.resolve(itemInfo.texturePath), targetTexturesPath.resolve(itemInfo.textureFileName + ".png"),
-                       StandardCopyOption.REPLACE_EXISTING);
+            copyPng(sourcePath.resolve(itemInfo.texturePath), targetTexturesPath.resolve(itemInfo.textureFileName + ".png"));
             String minecraftItemName = itemInfo.mytems.material.name().toLowerCase();
             MinecraftModel minecraftModel = minecraftItemMap.computeIfAbsent(minecraftItemName, n -> {
                     Path minecraftModelPath = vanillaPath.resolve("assets/minecraft/models/item/" + n + ".json");
@@ -271,5 +274,15 @@ public final class Main {
                     }
                 });
         }
+    }
+
+    static void copyPng(final Path source, final Path dest) throws IOException {
+        BufferedImage image = ImageIO.read(source.toFile());
+        ImageIO.write(image, "png", dest.toFile());
+    }
+
+    static void copyJson(final Path source, final Path dest) throws IOException {
+        Object o = Json.load(source.toFile(), Object.class);
+        Json.save(dest.toFile(), o);
     }
 }
