@@ -1,6 +1,7 @@
 package com.cavetale.cavetaleresourcepack;
 
 import com.cavetale.mytems.util.Json;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -14,11 +15,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.zip.Deflater;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.bukkit.Material;
 
 public final class Main {
     private static Random random = new Random();
     private static Set<String> usedNames = new HashSet<>();
+    static boolean doObfuscate = false;
 
     private Main() { }
 
@@ -29,18 +34,16 @@ public final class Main {
             + "\n java CavetaleResourcePack OPTIONS SOURCEPATH VANILLAPATH"
             + "\n OPTIONS"
             + "\n -o obfuscate the output";
-        System.out.println(usage);
     }
 
     static boolean run(String[] args) throws IOException {
-        boolean obfuscate = false;
         Path sourcePath = null;
         Path vanillaPath = null;
         for (String arg : args) {
             if (arg.startsWith("-")) {
                 switch (arg) {
                 case "-o":
-                    obfuscate = true;
+                    doObfuscate = true;
                     break;
                 default:
                     return false;
@@ -55,15 +58,12 @@ public final class Main {
                 }
             }
         }
-        makeResourcePack(sourcePath, vanillaPath, obfuscate);
+        makeResourcePack(sourcePath, vanillaPath);
         return true;
     }
 
-    static void makeResourcePack(final Path sourcePath, final Path vanillaPath, final boolean obfuscate) throws IOException {
+    static void makeResourcePack(final Path sourcePath, final Path vanillaPath) throws IOException {
         Path targetPath = Paths.get("target/resourcepack");
-        System.out.println(sourcePath);
-        System.out.println(vanillaPath);
-        System.out.println(targetPath);
         Files.createDirectories(targetPath);
         Map<String, ItemInfo> mytemsMap = new HashMap<>();
         Map<String, MinecraftModel> minecraftItemMap = new HashMap<>();
@@ -127,7 +127,7 @@ public final class Main {
                 System.err.println("Missing texture: " + itemInfo.name);
                 continue;
             }
-            if (obfuscate) {
+            if (doObfuscate) {
                 itemInfo.modelFileName = randomFileName();
                 itemInfo.textureFileName = randomFileName();
             } else {
@@ -146,7 +146,7 @@ public final class Main {
                 texturesMap.put("layer0", "mytems:item/" + itemInfo.textureFileName);
                 String modelJson = Json.serialize(modelFileObject);
                 Files.write(targetModelsPath.resolve(itemInfo.modelFileName + ".json"), modelJson.getBytes());
-            } else if (obfuscate) {
+            } else if (doObfuscate) {
                 Map<String, Object> modelFileObject = (Map<String, Object>) Json.load(sourcePath.resolve(itemInfo.modelPath).toFile(), Map.class, () -> null);
                 String modelJson = Json.serialize(modelFileObject);
                 modelJson = modelJson.replace(itemInfo.name, itemInfo.textureFileName);
@@ -173,8 +173,9 @@ public final class Main {
         Files.createDirectories(targetMinecraftModelsPath);
         for (MinecraftModel minecraftModel : minecraftItemMap.values()) {
             Path target = targetMinecraftModelsPath.resolve(minecraftModel.name + ".json");
-            Json.save(target.toFile(), minecraftModel.cook(), !obfuscate);
+            Json.save(target.toFile(), minecraftModel.cook(), !doObfuscate);
         }
+        zip(Paths.get("target/Cavetale.zip"), targetPath);
     }
 
     static String randomFileName() {
@@ -233,6 +234,42 @@ public final class Main {
             return true;
         default:
             return false;
+        }
+    }
+
+    static void zip(final Path zipFile, final Path sourcePath) throws IOException {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile.toFile()))) {
+            zipOutputStream.setLevel(Deflater.BEST_COMPRESSION);
+            zipOutputStream.setMethod(ZipOutputStream.DEFLATED);
+            Files.walkFileTree(sourcePath, new FileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path path, IOException exc) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes exc) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
+                        try {
+                            Path relative = sourcePath.relativize(path);
+                            ZipEntry zipEntry = new ZipEntry(relative.toString());
+                            zipOutputStream.putNextEntry(zipEntry);
+                            Files.copy(path, zipOutputStream);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFileFailed(Path path, IOException exc) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
         }
     }
 }
