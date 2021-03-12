@@ -10,19 +10,56 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import org.bukkit.Material;
 
 public final class Main {
-    static Random random = new Random();
+    private static Random random = new Random();
+    private static Set<String> usedNames = new HashSet<>();
 
     private Main() { }
 
-    public static void main(String[] args) throws Exception {
-        boolean obfuscate = true;
-        Path sourcePath = Paths.get(args[0]);
-        Path vanillaPath = Paths.get(args[1]);
+    public static void main(String[] args) throws IOException {
+        if (run(args)) return;
+        String usage = ""
+            + "USAGE"
+            + "\n java CavetaleResourcePack OPTIONS SOURCEPATH VANILLAPATH"
+            + "\n OPTIONS"
+            + "\n -o obfuscate the output";
+        System.out.println(usage);
+    }
+
+    static boolean run(String[] args) throws IOException {
+        boolean obfuscate = false;
+        Path sourcePath = null;
+        Path vanillaPath = null;
+        for (String arg : args) {
+            if (arg.startsWith("-")) {
+                switch (arg) {
+                case "-o":
+                    obfuscate = true;
+                    break;
+                default:
+                    return false;
+                }
+            } else {
+                if (sourcePath == null) {
+                    sourcePath = Paths.get(arg);
+                } else if (vanillaPath == null) {
+                    vanillaPath = Paths.get(arg);
+                } else {
+                    return false;
+                }
+            }
+        }
+        makeResourcePack(sourcePath, vanillaPath, obfuscate);
+        return true;
+    }
+
+    static void makeResourcePack(final Path sourcePath, final Path vanillaPath, final boolean obfuscate) throws IOException {
         Path targetPath = Paths.get("target/resourcepack");
         System.out.println(sourcePath);
         System.out.println(vanillaPath);
@@ -142,10 +179,14 @@ public final class Main {
 
     static String randomFileName() {
         String pool = "0123456789abcdefghijklmnopqrstuvwxyz";
-        String result = "";
-        for (int i = 0; i < 5; i += 1) {
-            result = result + pool.charAt(random.nextInt(pool.length()));
-        }
+        String result;
+        do {
+            result = "";
+            for (int i = 0; i < 5; i += 1) {
+                result = result + pool.charAt(random.nextInt(pool.length()));
+            }
+        } while (usedNames.contains(result));
+        usedNames.add(result);
         return result;
     }
 
