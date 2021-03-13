@@ -26,6 +26,7 @@ public final class Main {
     private static Random random = new Random();
     private static Set<String> usedNames = new HashSet<>();
     static boolean doObfuscate = false;
+    static boolean verbose = false;
 
     private Main() { }
 
@@ -35,20 +36,39 @@ public final class Main {
             + "USAGE"
             + "\n java CavetaleResourcePack OPTIONS SOURCEPATH VANILLAPATH"
             + "\n OPTIONS"
-            + "\n -o obfuscate the output";
+            + "\n -o --obfuscate  obfuscate the output"
+            + "\n -v --verbose    verbose output";
+        System.out.println(usage);
     }
 
     static boolean run(String[] args) throws IOException {
         Path sourcePath = null;
         Path vanillaPath = null;
         for (String arg : args) {
-            if (arg.startsWith("-")) {
-                switch (arg) {
-                case "-o":
+            if (arg.startsWith("--")) {
+                switch (arg.substring(2)) {
+                case "obfuscate":
                     doObfuscate = true;
+                    break;
+                case "verbose":
+                    verbose = true;
                     break;
                 default:
                     return false;
+                }
+            } else if (arg.startsWith("-")) {
+                for (int i = 1; i < arg.length(); i += 1) {
+                    char c = arg.charAt(i);
+                    switch (c) {
+                    case 'o':
+                        doObfuscate = true;
+                        break;
+                    case 'v':
+                        verbose = true;
+                        break;
+                    default:
+                        return false;
+                    }
                 }
             } else {
                 if (sourcePath == null) {
@@ -97,6 +117,18 @@ public final class Main {
                             } else if (directory.equals(Paths.get("assets/mytems/models/item"))) {
                                 ItemInfo itemInfo = new ItemInfo(file);
                                 mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).modelPath = relative;
+                            } else if (directory.endsWith("font")) {
+                                if (file.toString().endsWith(".png")) {
+                                    if (verbose) System.out.println("Copying Json " + relative);
+                                    copyPng(path, targetPath.resolve(relative));
+                                } else if (file.toString().endsWith(".json")) {
+                                    if (verbose) System.out.println("Copying Json " + relative);
+                                    copyJson(path, targetPath.resolve(relative));
+                                } else {
+                                    if (verbose) System.out.println("Copying verbatim " + relative);
+                                    Files.createDirectories(targetPath.resolve(relative).getParent());
+                                    Files.copy(path, targetPath.resolve(relative));
+                                }
                             }
                         }
                     } catch (Exception e) {
@@ -277,11 +309,13 @@ public final class Main {
     }
 
     static void copyPng(final Path source, final Path dest) throws IOException {
+        Files.createDirectories(dest.getParent());
         BufferedImage image = ImageIO.read(source.toFile());
         ImageIO.write(image, "png", dest.toFile());
     }
 
     static void copyJson(final Path source, final Path dest) throws IOException {
+        Files.createDirectories(dest.getParent());
         Object o = Json.load(source.toFile(), Object.class);
         Json.save(dest.toFile(), o);
     }

@@ -1,11 +1,6 @@
 {
     "providers": [
-        {
-            "type": "bitmap",
-            "file": "mytems:emoji/kitty_coin.png",
-            "ascent": 12,
-            "height": 16,
-            "chars": ["\u26C2"]
-        }
+        {"type": "bitmap","file": "cavetale:font/space.png","ascent": -32768,"height": -10,"chars": ["\uE001"]},
+        {"type": "bitmap","file": "cavetale:font/raid_reward.png","ascent": 130,"height": 256,"chars": ["\uE101"]}
     ]
 }
