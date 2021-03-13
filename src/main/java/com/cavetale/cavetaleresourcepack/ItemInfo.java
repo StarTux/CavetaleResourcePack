@@ -10,6 +10,7 @@ public final class ItemInfo {
     protected Mytems mytems;
     protected Path modelPath;
     protected Path texturePath;
+    protected Path mcMetaPath;
     protected String modelFileName;
     protected String textureFileName;
 

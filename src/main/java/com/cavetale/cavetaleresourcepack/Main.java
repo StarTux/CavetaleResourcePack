@@ -112,9 +112,19 @@ public final class Main {
                             Path directory = relative.getParent();
                             Path file = relative.getFileName();
                             if (directory.equals(Paths.get("assets/mytems/textures/item"))) {
-                                ItemInfo itemInfo = new ItemInfo(file);
-                                mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).texturePath = relative;
+                                if (file.toString().endsWith(".png.mcmeta")) {
+                                    if (verbose) System.out.println("Item texture meta: " + relative);
+                                    ItemInfo itemInfo = new ItemInfo(file);
+                                    mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).mcMetaPath = relative;
+                                } else if (file.toString().endsWith(".png")) {
+                                    if (verbose) System.out.println("Item texture: " + relative);
+                                    ItemInfo itemInfo = new ItemInfo(file);
+                                    mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).texturePath = relative;
+                                } else {
+                                    System.err.println("Unknown textures file: " + relative);
+                                }
                             } else if (directory.equals(Paths.get("assets/mytems/models/item"))) {
+                                if (verbose) System.out.println("Item model: " + relative);
                                 ItemInfo itemInfo = new ItemInfo(file);
                                 mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).modelPath = relative;
                             } else if (directory.endsWith("font")) {
@@ -129,6 +139,8 @@ public final class Main {
                                     Files.createDirectories(targetPath.resolve(relative).getParent());
                                     Files.copy(path, targetPath.resolve(relative));
                                 }
+                            } else {
+                                System.err.println("Unhandled file: " + relative);
                             }
                         }
                     } catch (Exception e) {
@@ -163,6 +175,18 @@ public final class Main {
                 System.err.println("Missing texture: " + itemInfo.name);
                 continue;
             }
+            // Minecraft item
+            String minecraftItemName = itemInfo.mytems.material.name().toLowerCase();
+            MinecraftModel minecraftModel = minecraftItemMap.computeIfAbsent(minecraftItemName, n -> {
+                    Path minecraftModelPath = vanillaPath.resolve("assets/minecraft/models/item/" + n + ".json");
+                    if (!Files.isReadable(minecraftModelPath)) {
+                        System.err.println("Not found: " + minecraftModelPath);
+                        return null;
+                    }
+                    Map<String, Object> map = (Map<String, Object>) Json.load(minecraftModelPath.toFile(), Map.class, () -> null);
+                    return new MinecraftModel(n, map);
+                });
+            //
             if (doObfuscate) {
                 itemInfo.modelFileName = randomFileName();
                 itemInfo.textureFileName = randomFileName();
@@ -172,14 +196,24 @@ public final class Main {
             }
             if (itemInfo.modelPath == null) {
                 Map<String, Object> modelFileObject = new HashMap<>();
-                if (isHandheld(itemInfo.mytems.material)) {
+                Object parent = minecraftModel.map.get("parent");
+                if (parent instanceof String && itemInfo.mytems.material == Material.END_ROD) {
+                    modelFileObject.put("parent", parent);
+                } else if (isHandheld(itemInfo.mytems.material)) {
                     modelFileObject.put("parent", "minecraft:item/handheld");
                 } else {
                     modelFileObject.put("parent", "minecraft:item/generated");
                 }
                 Map<String, Object> texturesMap = new HashMap<>();
                 modelFileObject.put("textures", texturesMap);
-                texturesMap.put("layer0", "mytems:item/" + itemInfo.textureFileName);
+                if (itemInfo.mytems.material == Material.END_ROD) {
+                    texturesMap.put("end_rod", "mytems:item/" + itemInfo.textureFileName);
+                } else {
+                    texturesMap.put("layer0", "mytems:item/" + itemInfo.textureFileName);
+                    if (itemInfo.mytems.material.name().startsWith("LEATHER_")) {
+                        texturesMap.put("layer1", "mytems:item/" + itemInfo.textureFileName);
+                    }
+                }
                 String modelJson = Json.serialize(modelFileObject);
                 Files.write(targetModelsPath.resolve(itemInfo.modelFileName + ".json"), modelJson.getBytes());
             } else if (doObfuscate) {
@@ -192,17 +226,10 @@ public final class Main {
                            StandardCopyOption.REPLACE_EXISTING);
             }
             copyPng(sourcePath.resolve(itemInfo.texturePath), targetTexturesPath.resolve(itemInfo.textureFileName + ".png"));
-            String minecraftItemName = itemInfo.mytems.material.name().toLowerCase();
-            MinecraftModel minecraftModel = minecraftItemMap.computeIfAbsent(minecraftItemName, n -> {
-                    Path minecraftModelPath = vanillaPath.resolve("assets/minecraft/models/item/" + n + ".json");
-                    if (!Files.isReadable(minecraftModelPath)) {
-                        System.err.println("Not found: " + minecraftModelPath);
-                        return null;
-                    }
-                    Map<String, Object> map = (Map<String, Object>) Json.load(minecraftModelPath.toFile(), Map.class, () -> null);
-                    return new MinecraftModel(n, map);
-                });
             minecraftModel.overrides.add(new ModelOverride(itemInfo.mytems.customModelData, itemInfo.modelFileName));
+            if (itemInfo.mcMetaPath != null) {
+                copyJson(sourcePath.resolve(itemInfo.mcMetaPath), targetTexturesPath.resolve(itemInfo.textureFileName + ".png.mcmeta"));
+            }
         }
         Path targetMinecraftModelsPath = targetPath.resolve("assets/minecraft/models/item");
         Files.createDirectories(targetMinecraftModelsPath);
