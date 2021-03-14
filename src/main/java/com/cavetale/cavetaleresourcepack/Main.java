@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -237,7 +239,9 @@ public final class Main {
             Path target = targetMinecraftModelsPath.resolve(minecraftModel.name + ".json");
             Json.save(target.toFile(), minecraftModel.cook(), !doObfuscate);
         }
-        zip(Paths.get("target/Cavetale.zip"), targetPath);
+        Path zipPath = Paths.get("target/Cavetale.zip");
+        zip(zipPath, targetPath);
+        sha1sum(zipPath, Paths.get("target/Cavetale.zip.sha1sum"));
     }
 
     static String randomFileName() {
@@ -333,6 +337,28 @@ public final class Main {
                     }
                 });
         }
+    }
+
+    static void sha1sum(final Path source, final Path target) throws IOException {
+        try {
+            byte[] b = Files.readAllBytes(source);
+            byte[] hash = MessageDigest.getInstance("SHA-1").digest(b);
+            String result = bytesToHex(hash);
+            Files.write(target, (result + "  " + source.getFileName() + "\n").getBytes());
+        } catch (NoSuchAlgorithmException nsa) {
+            throw new IllegalArgumentException(nsa);
+        }
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+        final char[] hexArray = "0123456789abcdef".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 
     static void copyPng(final Path source, final Path dest) throws IOException {
