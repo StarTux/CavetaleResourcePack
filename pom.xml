@@ -31,7 +31,6 @@
 	<configuration>
 	  <mainClass>com.cavetale.cavetaleresourcepack.Main</mainClass>
 	  <arguments>
-	    <argument>--obfuscate</argument>
 	    <argument>--verbose</argument>
 	    <argument>src/resourcepack</argument>
 	    <argument>vanilla</argument>

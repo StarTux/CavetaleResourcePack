@@ -1,6 +1,6 @@
 package com.cavetale.cavetaleresourcepack;
 
-import com.cavetale.mytems.util.Json;
+import com.cavetale.mytems.Mytems;
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,12 +9,14 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -29,6 +31,7 @@ public final class Main {
     private static Set<String> usedNames = new HashSet<>();
     static boolean doObfuscate = false;
     static boolean verbose = false;
+    static Map<PackPath, PackPath> texturePathMap = new HashMap<>();
 
     private Main() { }
 
@@ -86,162 +89,107 @@ public final class Main {
         return true;
     }
 
-    static void makeResourcePack(final Path sourcePath, final Path vanillaPath) throws IOException {
-        Path targetPath = Paths.get("target/resourcepack");
-        Files.createDirectories(targetPath);
-        Map<String, ItemInfo> mytemsMap = new HashMap<>();
-        Map<String, MinecraftModel> minecraftItemMap = new HashMap<>();
-        Files.walkFileTree(sourcePath, new FileVisitor<Path>() {
-                @Override
-                public FileVisitResult postVisitDirectory(Path path, IOException exc) {
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes exc) {
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
-                    try {
-                        Path relative = sourcePath.relativize(path);
-                        if (relative.toString().equals("pack.png")) {
-                            copyPng(path, targetPath.resolve(relative));
-                        } else if (relative.toString().equals("pack.mcmeta")) {
-                            copyJson(path, targetPath.resolve(relative));
-                        } else if (relative.getNameCount() > 1) {
-                            Path directory = relative.getParent();
-                            Path file = relative.getFileName();
-                            if (directory.equals(Paths.get("assets/mytems/textures/item"))) {
-                                if (file.toString().endsWith(".png.mcmeta")) {
-                                    if (verbose) System.out.println("Item texture meta: " + relative);
-                                    ItemInfo itemInfo = new ItemInfo(file);
-                                    mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).mcMetaPath = relative;
-                                } else if (file.toString().endsWith(".png")) {
-                                    if (verbose) System.out.println("Item texture: " + relative);
-                                    ItemInfo itemInfo = new ItemInfo(file);
-                                    mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).texturePath = relative;
-                                } else {
-                                    System.err.println("Unknown textures file: " + relative);
-                                }
-                            } else if (directory.equals(Paths.get("assets/mytems/models/item"))) {
-                                if (verbose) System.out.println("Item model: " + relative);
-                                ItemInfo itemInfo = new ItemInfo(file);
-                                mytemsMap.computeIfAbsent(itemInfo.name, n -> itemInfo).modelPath = relative;
-                            } else if (directory.endsWith("font")) {
-                                if (file.toString().endsWith(".png")) {
-                                    if (verbose) System.out.println("Copying Json " + relative);
-                                    copyPng(path, targetPath.resolve(relative));
-                                } else if (file.toString().endsWith(".json")) {
-                                    if (verbose) System.out.println("Copying Json " + relative);
-                                    copyJson(path, targetPath.resolve(relative));
-                                } else {
-                                    if (verbose) System.out.println("Copying verbatim " + relative);
-                                    Files.createDirectories(targetPath.resolve(relative).getParent());
-                                    Files.copy(path, targetPath.resolve(relative));
-                                }
-                            } else {
-                                System.err.println("Unhandled file: " + relative);
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+    static void makeResourcePack(final Path source, final Path vanilla) throws IOException {
+        Path dest = Paths.get("target/resourcepack");
+        Files.createDirectories(dest);
+        // Copy required files
+        copyJson(source, dest, "pack.mcmeta");
+        copyPng(source, dest, "pack.png");
+        // Copy (and obfuscate) textures
+        Files.list(source.resolve("assets/mytems/textures/item")).forEach(local -> makeTextureFile(source, dest, local));
+        Files.list(source.resolve("assets/cavetale/textures/font")).forEach(local -> makeTextureFile(source, dest, local));
+        // Build the mytems models
+        Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
+        for (Mytems mytems : Mytems.values()) {
+            if (mytems.customModelData == null) continue;
+            if (mytems.material == null) continue;
+            String modelPath = "assets/mytems/models/item/" + mytems.id + ".json";
+            Path modelSource = source.resolve(modelPath);
+            ModelJson modelJson;
+            if (Files.isRegularFile(modelSource)) {
+                modelJson = Json.load(modelSource.toFile(), ModelJson.class, ModelJson::new);
+                for (String key : modelJson.getTextureKeys()) {
+                    String value = modelJson.getTexture(key);
+                    PackPath packPath = PackPath.fromString(value);
+                    PackPath packPathValue = texturePathMap.get(packPath);
+                    if (packPathValue != null) {
+                        modelJson.setTexture(key, packPathValue.toString());
                     }
-                    return FileVisitResult.CONTINUE;
                 }
-
-                @Override
-                public FileVisitResult visitFileFailed(Path path, IOException exc) {
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        Path targetModelsPath = targetPath.resolve(Paths.get("assets/mytems/models/item"));
-        Files.createDirectories(targetModelsPath);
-        Path targetTexturesPath = targetPath.resolve(Paths.get("assets/mytems/textures/item"));
-        Files.createDirectories(targetTexturesPath);
-        for (ItemInfo itemInfo : mytemsMap.values()) {
-            if (itemInfo.mytems == null) {
-                System.err.println("Mytem not found: " + itemInfo.name);
-                continue;
-            }
-            if (itemInfo.mytems.material == null) {
-                System.err.println("Mytems.material is null: " + itemInfo.mytems);
-                continue;
-            }
-            if (itemInfo.mytems.customModelData == null) {
-                System.err.println("Mytems.customModelData is null: " + itemInfo.mytems);
-                continue;
-            }
-            if (itemInfo.texturePath == null) {
-                System.err.println("Missing texture: " + itemInfo.name);
-                continue;
-            }
-            // Minecraft item
-            String minecraftItemName = itemInfo.mytems.material.name().toLowerCase();
-            MinecraftModel minecraftModel = minecraftItemMap.computeIfAbsent(minecraftItemName, n -> {
-                    Path minecraftModelPath = vanillaPath.resolve("assets/minecraft/models/item/" + n + ".json");
-                    if (!Files.isReadable(minecraftModelPath)) {
-                        System.err.println("Not found: " + minecraftModelPath);
-                        return null;
-                    }
-                    Map<String, Object> map = (Map<String, Object>) Json.load(minecraftModelPath.toFile(), Map.class, () -> null);
-                    return new MinecraftModel(n, map);
-                });
-            //
-            if (doObfuscate) {
-                itemInfo.modelFileName = randomFileName();
-                itemInfo.textureFileName = randomFileName();
             } else {
-                itemInfo.modelFileName = itemInfo.name;
-                itemInfo.textureFileName = itemInfo.name;
-            }
-            if (itemInfo.modelPath == null) {
-                Map<String, Object> modelFileObject = new HashMap<>();
-                Object parent = minecraftModel.map.get("parent");
-                if (parent instanceof String && itemInfo.mytems.material == Material.END_ROD) {
-                    modelFileObject.put("parent", parent);
-                } else if (isHandheld(itemInfo.mytems.material)) {
-                    modelFileObject.put("parent", "minecraft:item/handheld");
+                // Generate a model json file
+                modelJson = new ModelJson();
+                if (mytems == Mytems.UNICORN_HORN) {
+                    modelJson.parent = PackPath.of("minecraft", "block", "end_rod").toString();
+                } else if (isHandheld(mytems.material)) {
+                    modelJson.parent = new PackPath("minecraft", "item", "handheld").toString();
                 } else {
-                    modelFileObject.put("parent", "minecraft:item/generated");
+                    modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
                 }
-                Map<String, Object> texturesMap = new HashMap<>();
-                modelFileObject.put("textures", texturesMap);
-                if (itemInfo.mytems.material == Material.END_ROD) {
-                    texturesMap.put("end_rod", "mytems:item/" + itemInfo.textureFileName);
+                // Put in the (maybe obfuscated) texture file paths
+                PackPath texturePath = texturePathMap.get(PackPath.mytemsItem(mytems.id));
+                if (mytems.material == Material.END_ROD) {
+                    modelJson.setTexture("end_rod", texturePath.toString());
                 } else {
-                    texturesMap.put("layer0", "mytems:item/" + itemInfo.textureFileName);
-                    if (itemInfo.mytems.material.name().startsWith("LEATHER_")) {
-                        texturesMap.put("layer1", "mytems:item/" + itemInfo.textureFileName);
+                    modelJson.setTexture("layer0", texturePath.toString());
+                    if (mytems.material.name().startsWith("LEATHER_")) {
+                        modelJson.setTexture("layer1", texturePath.toString());
                     }
                 }
-                String modelJson = Json.serialize(modelFileObject);
-                Files.write(targetModelsPath.resolve(itemInfo.modelFileName + ".json"), modelJson.getBytes());
-            } else if (doObfuscate) {
-                Map<String, Object> modelFileObject = (Map<String, Object>) Json.load(sourcePath.resolve(itemInfo.modelPath).toFile(), Map.class, () -> null);
-                String modelJson = Json.serialize(modelFileObject);
-                modelJson = modelJson.replace(itemInfo.name, itemInfo.textureFileName);
-                Files.write(targetModelsPath.resolve(itemInfo.modelFileName + ".json"), modelJson.getBytes());
-            } else {
-                Files.copy(sourcePath.resolve(itemInfo.modelPath), targetModelsPath.resolve(itemInfo.modelFileName + ".json"),
-                           StandardCopyOption.REPLACE_EXISTING);
             }
-            copyPng(sourcePath.resolve(itemInfo.texturePath), targetTexturesPath.resolve(itemInfo.textureFileName + ".png"));
-            minecraftModel.overrides.add(new ModelOverride(itemInfo.mytems.customModelData, itemInfo.modelFileName));
-            if (itemInfo.mcMetaPath != null) {
-                copyJson(sourcePath.resolve(itemInfo.mcMetaPath), targetTexturesPath.resolve(itemInfo.textureFileName + ".png.mcmeta"));
+            PackPath modelPackPath = doObfuscate ? PackPath.mytemsItem(randomFileName()) : PackPath.mytemsItem(mytems.id);
+            Path modelDest = dest.resolve(modelPackPath.toPath("models", ".json"));
+            Files.createDirectories(modelDest.getParent());
+            Json.save(modelDest.toFile(), modelJson, !doObfuscate);
+            materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
+                .add(new ModelOverride(mytems.customModelData, PackPath.mytemsItem(mytems.id)));
+        }
+        for (Map.Entry<Material, List<ModelOverride>> entry : materialOverridesMap.entrySet()) {
+            Material material = entry.getKey();
+            List<ModelOverride> overrides = entry.getValue();
+            String modelPath = "assets/minecraft/models/item/" + material.name().toLowerCase() + ".json";
+            Path modelSource = vanilla.resolve(modelPath);
+            if (!Files.isRegularFile(modelSource)) {
+                System.err.println("File not found: " + modelSource);
             }
+            ModelJson minecraftModel = Json.load(modelSource.toFile(), ModelJson.class, ModelJson::new);
+            Collections.sort(overrides);
+            minecraftModel.addOverrides(overrides);
+            Path modelDest = dest.resolve(modelPath);
+            Files.createDirectories(modelDest.getParent());
+            Json.save(modelDest.toFile(), minecraftModel, !doObfuscate);
         }
-        Path targetMinecraftModelsPath = targetPath.resolve("assets/minecraft/models/item");
-        Files.createDirectories(targetMinecraftModelsPath);
-        for (MinecraftModel minecraftModel : minecraftItemMap.values()) {
-            Path target = targetMinecraftModelsPath.resolve(minecraftModel.name + ".json");
-            Json.save(target.toFile(), minecraftModel.cook(), !doObfuscate);
-        }
+        // Build the default font
+        Path fontDest = dest.resolve("assets/cavetale/font");
+        Files.createDirectories(fontDest);
+        Json.save(fontDest.resolve("default.json").toFile(), FontJson.ofList(DefaultFont.toList(texturePathMap)), !doObfuscate);
+        // Pack it up
         Path zipPath = Paths.get("target/Cavetale.zip");
-        zip(zipPath, targetPath);
-        sha1sum(zipPath, Paths.get("target/Cavetale.zip.sha1sum"));
+        zip(zipPath, dest);
+        sha1sum(zipPath, Paths.get("target/Cavetale.zip.sha1"));
+    }
+
+    static void makeTextureFile(Path source, Path dest, Path local) {
+        Path file = local.getFileName();
+        if (file.toString().endsWith(".png")) {
+            Path relative = source.relativize(local);
+            PackPath packPath = PackPath.fromPath(relative);
+            PackPath packPathValue = doObfuscate ? packPath.withName(randomFileName()) : packPath;
+            texturePathMap.put(packPath, packPathValue);
+            try {
+                copyPng(local, dest.resolve(packPathValue.toPath("textures", ".png")));
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+            Path localMcMeta = local.getParent().resolve(file.toString() + ".mcmeta");
+            if (Files.isRegularFile(localMcMeta)) {
+                try {
+                    copyJson(localMcMeta, dest.resolve(packPathValue.toPath("textures", ".png.mcmeta")));
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            }
+        }
     }
 
     static String randomFileName() {
@@ -363,13 +311,29 @@ public final class Main {
 
     static void copyPng(final Path source, final Path dest) throws IOException {
         Files.createDirectories(dest.getParent());
+        if (!doObfuscate) {
+            Files.copy(source, dest);
+            return;
+        }
         BufferedImage image = ImageIO.read(source.toFile());
         ImageIO.write(image, "png", dest.toFile());
     }
 
+    static void copyPng(final Path source, final Path dest, String filename) throws IOException {
+        copyPng(source.resolve(filename), dest.resolve(filename));
+    }
+
     static void copyJson(final Path source, final Path dest) throws IOException {
         Files.createDirectories(dest.getParent());
+        if (!doObfuscate) {
+            Files.copy(source, dest);
+            return;
+        }
         Object o = Json.load(source.toFile(), Object.class);
         Json.save(dest.toFile(), o);
+    }
+
+    static void copyJson(final Path source, final Path dest, String filename) throws IOException {
+        copyJson(source.resolve(filename), dest.resolve(filename));
     }
 }

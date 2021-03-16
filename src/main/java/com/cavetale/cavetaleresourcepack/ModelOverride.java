@@ -7,7 +7,7 @@ import lombok.Value;
 @Value
 public final class ModelOverride implements Comparable<ModelOverride> {
     protected int customModelData;
-    protected String itemName;
+    protected PackPath item;
 
     @Override
     public int compareTo(ModelOverride other) {
@@ -16,7 +16,7 @@ public final class ModelOverride implements Comparable<ModelOverride> {
 
     public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("model", "mytems:item/" + itemName);
+        result.put("model", item.toString());
         Map<String, Object> predicate = new HashMap<>();
         predicate.put("custom_model_data", customModelData);
         result.put("predicate", predicate);
