@@ -142,7 +142,7 @@ public final class Main {
             Files.createDirectories(modelDest.getParent());
             Json.save(modelDest.toFile(), modelJson, !doObfuscate);
             materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
-                .add(new ModelOverride(mytems.customModelData, PackPath.mytemsItem(mytems.id)));
+                .add(new ModelOverride(mytems.customModelData, modelPackPath));
         }
         for (Map.Entry<Material, List<ModelOverride>> entry : materialOverridesMap.entrySet()) {
             Material material = entry.getKey();
