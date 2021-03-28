@@ -9,9 +9,9 @@ import lombok.Data;
 // example "mytems:item/boss_chest_front"
 @Data @AllArgsConstructor
 public final class PackPath {
-    protected String namespace;
-    protected String folder;
-    protected String filename;
+    protected String namespace; // e.g. minecraft, mytems
+    protected String folder; // e.g. models, textures
+    protected String filename; // e.g. player_head, dr_acula_staff
 
     public static PackPath fromString(String str) {
         String namespace;

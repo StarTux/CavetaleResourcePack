@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.Deflater;
@@ -32,6 +33,7 @@ public final class Main {
     static boolean doObfuscate = false;
     static boolean verbose = false;
     static Map<PackPath, PackPath> texturePathMap = new HashMap<>();
+    static Map<PackPath, PackPath> modelPathMap = new HashMap<>();
 
     private Main() { }
 
@@ -100,6 +102,7 @@ public final class Main {
         Files.list(source.resolve("assets/cavetale/textures/font")).forEach(local -> makeTextureFile(source, dest, local));
         // Build the mytems models
         Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
+        List<PackPath> extraItemModels = new ArrayList<>(); // Store source path of parents found in mytems item model files
         for (Mytems mytems : Mytems.values()) {
             if (mytems.customModelData == null) continue;
             if (mytems.material == null) continue;
@@ -114,6 +117,19 @@ public final class Main {
                     PackPath packPathValue = texturePathMap.get(packPath);
                     if (packPathValue != null) {
                         modelJson.setTexture(key, packPathValue.toString());
+                    }
+                }
+                if (modelJson.parent != null) {
+                    PackPath parentPath = PackPath.fromString(modelJson.parent);
+                    if (Objects.equals("mytems", parentPath.namespace)) {
+                        if (!extraItemModels.contains(parentPath)) {
+                            extraItemModels.add(parentPath);
+                        }
+                        if (doObfuscate) {
+                            PackPath obfuscated = parentPath.withName(randomFileName());
+                            modelPathMap.put(parentPath, obfuscated);
+                            modelJson.parent = parentPath.toString();
+                        }
                     }
                 }
             } else {
@@ -137,12 +153,40 @@ public final class Main {
                     }
                 }
             }
-            PackPath modelPackPath = doObfuscate ? PackPath.mytemsItem(randomFileName()) : PackPath.mytemsItem(mytems.id);
+            PackPath modelPackPath = PackPath.mytemsItem(mytems.id);
+            if (doObfuscate) {
+                PackPath obfuscated = PackPath.mytemsItem(randomFileName());
+                modelPathMap.put(modelPackPath, obfuscated);
+                modelPackPath = obfuscated;
+            }
             Path modelDest = dest.resolve(modelPackPath.toPath("models", ".json"));
             Files.createDirectories(modelDest.getParent());
             Json.save(modelDest.toFile(), modelJson, !doObfuscate);
             materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
                 .add(new ModelOverride(mytems.customModelData, modelPackPath));
+        }
+        // Build extra item models. They were referenced in the actual
+        // models' parent field. Their names have already been
+        // obfuscated. If the extra models likewise reference a
+        // parent, they will be added to the list and processed later.
+        for (int i = 0; i < extraItemModels.size(); i += 1) {
+            PackPath packPath = extraItemModels.get(i);
+            Path path = packPath.toPath("models", ".json");
+            ModelJson modelJson = Json.load(source.resolve(path).toFile(), ModelJson.class, ModelJson::new);
+            if (modelJson.parent != null) {
+                PackPath parentPath = PackPath.fromString(modelJson.parent);
+                if (Objects.equals("mytems", parentPath.namespace)) {
+                    if (!extraItemModels.contains(parentPath)) {
+                        extraItemModels.add(parentPath);
+                    }
+                    if (doObfuscate) {
+                        PackPath obfuscated = parentPath.withName(randomFileName());
+                        modelPathMap.put(parentPath, obfuscated);
+                        modelJson.parent = parentPath.toString();
+                    }
+                }
+            }
+            Json.save(dest.resolve(path).toFile(), modelJson, !doObfuscate);
         }
         for (Map.Entry<Material, List<ModelOverride>> entry : materialOverridesMap.entrySet()) {
             Material material = entry.getKey();

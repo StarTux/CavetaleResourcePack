@@ -1,0 +1,7 @@
+{
+    "parent": "mytems:item/template_easter_egg",
+    "textures": {
+	"egg": "mytems:item/pink_easter_egg",
+	"nest": "minecraft:block/tube_coral_fan"
+    }
+}

@@ -8,6 +8,7 @@ import java.util.Map;
 public final class ModelJson {
     protected String parent;
     protected Boolean ambientocclusion;
+    @SuppressWarnings("MemberName")
     protected String gui_light;
     protected List<Object> elements;
     protected Map<String, Object> display;
