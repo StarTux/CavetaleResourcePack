@@ -1,0 +1,70 @@
+{
+    "credit": "Made with Blockbench",
+    "parent": "block/block",
+    "textures": {
+	"particle": "mytems:item/white_bunny_ears",
+	"ears": "mytems:item/white_bunny_ears"
+    },
+    "elements": [
+	{
+	    "name": "left",
+	    "from": [2, 0, 10],
+	    "to": [6, 12, 12],
+	    "rotation": {"angle": -22.5, "axis": "y", "origin": [5, 0, 11]},
+	    "faces": {
+		"north": {"uv": [4, 4, 0, 16], "texture": "#ears"},
+		"east": {"uv": [4, 4, 6, 16], "texture": "#ears"},
+		"south": {"uv": [16, 4, 12, 16], "texture": "#ears"},
+		"west": {"uv": [6, 4, 4, 16], "texture": "#ears"},
+		"up": {"uv": [6, 2, 10, 4], "texture": "#ears"}
+	    }
+	},
+	{
+	    "name": "right",
+	    "from": [10, 0, 10],
+	    "to": [14, 12, 12],
+	    "rotation": {"angle": 22.5, "axis": "y", "origin": [11, 0, 11]},
+	    "faces": {
+		"north": {"uv": [0, 4, 4, 16], "texture": "#ears"},
+		"east": {"uv": [4, 4, 6, 16], "texture": "#ears"},
+		"south": {"uv": [12, 4, 16, 16], "texture": "#ears"},
+		"west": {"uv": [6, 4, 4, 16], "texture": "#ears"},
+		"up": {"uv": [6, 2, 10, 4], "texture": "#ears"}
+	    }
+	},
+	{
+	    "name": "right_tip",
+	    "from": [10, 12, 10],
+	    "to": [12, 14, 12],
+	    "rotation": {"angle": 22.5, "axis": "y", "origin": [11, 0, 11]},
+	    "faces": {
+		"north": {"uv": [2, 0, 4, 2], "texture": "#ears"},
+		"east": {"uv": [4, 0, 6, 2], "texture": "#ears"},
+		"south": {"uv": [12, 0, 14, 2], "texture": "#ears"},
+		"west": {"uv": [4, 0, 6, 2], "texture": "#ears"},
+		"up": {"uv": [4, 0, 6, 2], "texture": "#ears"}
+	    }
+	},
+	{
+	    "name": "left_tip",
+	    "from": [4, 12, 10],
+	    "to": [6, 14, 12],
+	    "rotation": {"angle": -22.5, "axis": "y", "origin": [5, 0, 11]},
+	    "faces": {
+		"north": {"uv": [2, 0, 4, 2], "texture": "#ears"},
+		"east": {"uv": [4, 0, 6, 2], "texture": "#ears"},
+		"south": {"uv": [12, 0, 14, 2], "texture": "#ears"},
+		"west": {"uv": [4, 0, 6, 2], "texture": "#ears"},
+		"up": {"uv": [4, 0, 6, 2], "texture": "#ears"}
+	    }
+	}
+    ],
+    "display": {
+	"head": {
+	    "translation": [0, 13, 0]
+	},
+	"gui": {
+	    "rotation": [0, 180, 0]
+	}
+    }
+}
