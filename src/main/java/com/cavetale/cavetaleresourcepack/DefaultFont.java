@@ -7,7 +7,10 @@ import java.util.Map;
 
 public enum DefaultFont {
     SPACE10(PackPath.cavetaleFont("space"), -32768, -10, (char) 0xE001),
-    RAID_REWARD(PackPath.cavetaleFont("raid_reward"), 130, 256, '\uE101');
+    RAID_REWARD(PackPath.cavetaleFont("raid_reward"), 130, 256, '\uE101'),
+    EASTER_EGG(PackPath.cavetaleFont("easter_egg"), 8, 8, '\uE102'),
+    EASTER_BUNNY(PackPath.mytemsItem("easter_token"), 8, 8, '\uE103'),
+    KITTY_COIN(PackPath.mytemsItem("kitty_coin"), 8, 8, '\uE104');
 
     public static final int MIN_ASCENT = -32768;
 
