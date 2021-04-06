@@ -9,6 +9,7 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -356,7 +357,7 @@ public final class Main {
     static void copyPng(final Path source, final Path dest) throws IOException {
         Files.createDirectories(dest.getParent());
         if (!doObfuscate) {
-            Files.copy(source, dest);
+            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
             return;
         }
         BufferedImage image = ImageIO.read(source.toFile());
@@ -370,7 +371,7 @@ public final class Main {
     static void copyJson(final Path source, final Path dest) throws IOException {
         Files.createDirectories(dest.getParent());
         if (!doObfuscate) {
-            Files.copy(source, dest);
+            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
             return;
         }
         Object o = Json.load(source.toFile(), Object.class);
