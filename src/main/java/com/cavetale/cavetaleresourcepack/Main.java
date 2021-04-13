@@ -135,7 +135,7 @@ public final class Main {
                             if (doObfuscate) {
                                 PackPath obfuscated = parentPath.withName(randomFileName());
                                 if (verbose) {
-                                    System.err.println(parentPath + " => " + obfuscated);
+                                    System.err.println("model " + parentPath + " => " + obfuscated);
                                 }
                                 modelPathMap.put(parentPath, obfuscated);
                                 modelJson.parent = obfuscated.toString();
@@ -168,7 +168,7 @@ public final class Main {
             if (doObfuscate) {
                 PackPath obfuscated = PackPath.mytemsItem(randomFileName());
                 if (verbose) {
-                    System.err.println(modelPackPath + " => " + obfuscated);
+                    System.err.println("model " + modelPackPath + " => " + obfuscated);
                 }
                 modelPathMap.put(modelPackPath, obfuscated);
                 modelPackPath = obfuscated;
@@ -200,7 +200,7 @@ public final class Main {
                         if (doObfuscate) {
                             PackPath obfuscated = parentPath.withName(randomFileName());
                             if (verbose) {
-                                System.err.println(parentPath + " => " + obfuscated);
+                                System.err.println("model " + parentPath + " => " + obfuscated);
                             }
                             modelPathMap.put(parentPath, obfuscated);
                             modelJson.parent = obfuscated.toString();
@@ -286,7 +286,7 @@ public final class Main {
                 PackPath packPath = PackPath.fromPath(relative2);
                 PackPath packPathValue = doObfuscate ? packPath.withName(randomFileName()) : packPath;
                 if (verbose) {
-                    System.err.println(packPath + " => " + packPathValue);
+                    System.err.println("texture " + packPath + " => " + packPathValue);
                 }
                 texturePathMap.put(packPath, packPathValue);
                 try {
@@ -408,7 +408,7 @@ public final class Main {
             String result = bytesToHex(hash);
             Files.write(target, (result + "  " + source.getFileName() + "\n").getBytes());
             if (verbose) {
-                System.err.println(result);
+                System.err.println("sha1sum " + result);
             }
         } catch (NoSuchAlgorithmException nsa) {
             throw new IllegalArgumentException(nsa);
