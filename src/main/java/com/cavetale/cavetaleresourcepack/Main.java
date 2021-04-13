@@ -101,10 +101,8 @@ public final class Main {
         copyJson(source, dest, "pack.mcmeta");
         copyPng(source, dest, "pack.png");
         // Copy (and obfuscate) textures
-        Path mytemsTexturesItem = Paths.get("assets/mytems/textures/item");
-        Files.list(source.resolve(mytemsTexturesItem)).sorted().forEach(local -> makeTextureFile(source, dest, mytemsTexturesItem, local));
-        Path cavetaleTexturesFont = Paths.get("assets/cavetale/textures/font");
-        Files.list(source.resolve(cavetaleTexturesFont)).sorted().forEach(local -> makeTextureFile(source, dest, cavetaleTexturesFont, local));
+        makeTextureFiles(source, dest, Paths.get("assets/mytems/textures/item"));
+        makeTextureFiles(source, dest, Paths.get("assets/cavetale/textures/font"));
         // Build the mytems models
         Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
         List<PackPath> extraItemModels = new ArrayList<>(); // Store source path of parents found in mytems item model files
@@ -242,44 +240,67 @@ public final class Main {
     }
 
     /**
-     * Copy a texture file from src to dest. Translate their source
-     * path to the new destination path. Store PackPath in
-     * texturePathMap.
+     * Find all texture files under the given directory and copy them
+     * to their appropriate destination path. Put the obfuscated name
+     * in the texturePathMap if required.
      * @param source root of the global source path
      * @param dest root the global dest path
-     * @param path origin of the relative path to source and
-     * dest. This value stays the same in recursive calls so the dest
-     * becomes a flat folder.
-     * @param local the file
+     * @param the relative path
      */
-    static void makeTextureFile(Path source, Path dest, Path path, Path local) {
-        Path file = local.getFileName();
-        if (Files.isDirectory(local)) {
-            // Recursive
-            try {
-                Files.list(local).sorted().forEach(local2 -> makeTextureFile(source, dest, path, local2));
-            } catch (IOException ioe) {
-                throw new IllegalStateException(ioe);
-            }
-        } else if (file.toString().endsWith(".png")) {
-            Path relative = path.resolve(file);
-            PackPath packPath = PackPath.fromPath(relative);
-            PackPath packPathValue = doObfuscate ? packPath.withName(randomFileName()) : packPath;
-            if (verbose) {
-                System.err.println(packPath + " => " + packPathValue);
-            }
-            texturePathMap.put(packPath, packPathValue);
-            try {
-                copyPng(local, dest.resolve(packPathValue.toPath("textures", ".png")));
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-            Path localMcMeta = local.getParent().resolve(file.toString() + ".mcmeta");
-            if (Files.isRegularFile(localMcMeta)) {
+    static void makeTextureFiles(Path source, Path dest, Path relative) throws IOException {
+        Map<Path, String> pathMap = new HashMap<>();
+        Files.walkFileTree(source.resolve(relative), new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult postVisitDirectory(Path path, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
+                    try {
+                        Path relative = source.relativize(path);
+                        pathMap.put(relative, relative.getFileName().toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path path, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        List<Path> paths = new ArrayList<>(pathMap.keySet());
+        Collections.sort(paths, (a, b) -> (pathMap.get(a).compareTo(pathMap.get(b))));
+        for (Path path : paths) {
+            Path local = source.resolve(path);
+            Path file = local.getFileName();
+            if (file.toString().endsWith(".png")) {
+                Path relative2 = relative.resolve(file);
+                PackPath packPath = PackPath.fromPath(relative2);
+                PackPath packPathValue = doObfuscate ? packPath.withName(randomFileName()) : packPath;
+                if (verbose) {
+                    System.err.println(packPath + " => " + packPathValue);
+                }
+                texturePathMap.put(packPath, packPathValue);
                 try {
-                    copyJson(localMcMeta, dest.resolve(packPathValue.toPath("textures", ".png.mcmeta")));
+                    copyPng(local, dest.resolve(packPathValue.toPath("textures", ".png")));
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
+                }
+                Path localMcMeta = local.getParent().resolve(file.toString() + ".mcmeta");
+                if (Files.isRegularFile(localMcMeta)) {
+                    try {
+                        copyJson(localMcMeta, dest.resolve(packPathValue.toPath("textures", ".png.mcmeta")));
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
                 }
             }
         }
