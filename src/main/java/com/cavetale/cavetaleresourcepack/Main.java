@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public final class Main {
     static boolean verbose = false;
     static Map<PackPath, PackPath> texturePathMap = new HashMap<>();
     static Map<PackPath, PackPath> modelPathMap = new HashMap<>();
+    static int nextRandomFile;
 
     private Main() { }
 
@@ -99,8 +101,10 @@ public final class Main {
         copyJson(source, dest, "pack.mcmeta");
         copyPng(source, dest, "pack.png");
         // Copy (and obfuscate) textures
-        Files.list(source.resolve("assets/mytems/textures/item")).forEach(local -> makeTextureFile(source, dest, local));
-        Files.list(source.resolve("assets/cavetale/textures/font")).forEach(local -> makeTextureFile(source, dest, local));
+        Path mytemsTexturesItem = Paths.get("assets/mytems/textures/item");
+        Files.list(source.resolve(mytemsTexturesItem)).sorted().forEach(local -> makeTextureFile(source, dest, mytemsTexturesItem, local));
+        Path cavetaleTexturesFont = Paths.get("assets/cavetale/textures/font");
+        Files.list(source.resolve(cavetaleTexturesFont)).sorted().forEach(local -> makeTextureFile(source, dest, cavetaleTexturesFont, local));
         // Build the mytems models
         Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
         List<PackPath> extraItemModels = new ArrayList<>(); // Store source path of parents found in mytems item model files
@@ -123,13 +127,21 @@ public final class Main {
                 if (modelJson.parent != null) {
                     PackPath parentPath = PackPath.fromString(modelJson.parent);
                     if (Objects.equals("mytems", parentPath.namespace)) {
-                        if (!extraItemModels.contains(parentPath)) {
+                        if (extraItemModels.contains(parentPath)) {
+                            if (doObfuscate) {
+                                PackPath obfuscated = modelPathMap.get(parentPath);
+                                modelJson.parent = obfuscated.toString();
+                            }
+                        } else {
                             extraItemModels.add(parentPath);
-                        }
-                        if (doObfuscate) {
-                            PackPath obfuscated = parentPath.withName(randomFileName());
-                            modelPathMap.put(parentPath, obfuscated);
-                            modelJson.parent = parentPath.toString();
+                            if (doObfuscate) {
+                                PackPath obfuscated = parentPath.withName(randomFileName());
+                                if (verbose) {
+                                    System.err.println(parentPath + " => " + obfuscated);
+                                }
+                                modelPathMap.put(parentPath, obfuscated);
+                                modelJson.parent = obfuscated.toString();
+                            }
                         }
                     }
                 }
@@ -157,6 +169,9 @@ public final class Main {
             PackPath modelPackPath = PackPath.mytemsItem(mytems.id);
             if (doObfuscate) {
                 PackPath obfuscated = PackPath.mytemsItem(randomFileName());
+                if (verbose) {
+                    System.err.println(modelPackPath + " => " + obfuscated);
+                }
                 modelPathMap.put(modelPackPath, obfuscated);
                 modelPackPath = obfuscated;
             }
@@ -177,15 +192,27 @@ public final class Main {
             if (modelJson.parent != null) {
                 PackPath parentPath = PackPath.fromString(modelJson.parent);
                 if (Objects.equals("mytems", parentPath.namespace)) {
-                    if (!extraItemModels.contains(parentPath)) {
+                    if (extraItemModels.contains(parentPath)) {
+                        if (doObfuscate) {
+                            PackPath obfuscated = modelPathMap.get(parentPath);
+                            modelJson.parent = obfuscated.toString();
+                        }
+                    } else {
                         extraItemModels.add(parentPath);
-                    }
-                    if (doObfuscate) {
-                        PackPath obfuscated = parentPath.withName(randomFileName());
-                        modelPathMap.put(parentPath, obfuscated);
-                        modelJson.parent = parentPath.toString();
+                        if (doObfuscate) {
+                            PackPath obfuscated = parentPath.withName(randomFileName());
+                            if (verbose) {
+                                System.err.println(parentPath + " => " + obfuscated);
+                            }
+                            modelPathMap.put(parentPath, obfuscated);
+                            modelJson.parent = obfuscated.toString();
+                        }
                     }
                 }
+            }
+            if (doObfuscate) {
+                packPath = modelPathMap.get(packPath);
+                path = packPath.toPath("models", ".json");
             }
             Json.save(dest.resolve(path).toFile(), modelJson, !doObfuscate);
         }
@@ -214,12 +241,33 @@ public final class Main {
         sha1sum(zipPath, Paths.get("target/Cavetale.zip.sha1"));
     }
 
-    static void makeTextureFile(Path source, Path dest, Path local) {
+    /**
+     * Copy a texture file from src to dest. Translate their source
+     * path to the new destination path. Store PackPath in
+     * texturePathMap.
+     * @param source root of the global source path
+     * @param dest root the global dest path
+     * @param path origin of the relative path to source and
+     * dest. This value stays the same in recursive calls so the dest
+     * becomes a flat folder.
+     * @param local the file
+     */
+    static void makeTextureFile(Path source, Path dest, Path path, Path local) {
         Path file = local.getFileName();
-        if (file.toString().endsWith(".png")) {
-            Path relative = source.relativize(local);
+        if (Files.isDirectory(local)) {
+            // Recursive
+            try {
+                Files.list(local).sorted().forEach(local2 -> makeTextureFile(source, dest, path, local2));
+            } catch (IOException ioe) {
+                throw new IllegalStateException(ioe);
+            }
+        } else if (file.toString().endsWith(".png")) {
+            Path relative = path.resolve(file);
             PackPath packPath = PackPath.fromPath(relative);
             PackPath packPathValue = doObfuscate ? packPath.withName(randomFileName()) : packPath;
+            if (verbose) {
+                System.err.println(packPath + " => " + packPathValue);
+            }
             texturePathMap.put(packPath, packPathValue);
             try {
                 copyPng(local, dest.resolve(packPathValue.toPath("textures", ".png")));
@@ -238,16 +286,7 @@ public final class Main {
     }
 
     static String randomFileName() {
-        String pool = "0123456789abcdefghijklmnopqrstuvwxyz";
-        String result;
-        do {
-            result = "";
-            for (int i = 0; i < 5; i += 1) {
-                result = result + pool.charAt(random.nextInt(pool.length()));
-            }
-        } while (usedNames.contains(result));
-        usedNames.add(result);
-        return result;
+        return Integer.toHexString(++nextRandomFile);
     }
 
     static boolean isHandheld(Material mat) {
@@ -297,38 +336,47 @@ public final class Main {
     }
 
     static void zip(final Path zipFile, final Path sourcePath) throws IOException {
+        List<Path> paths = new ArrayList<>();
+        Files.walkFileTree(sourcePath, new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult postVisitDirectory(Path path, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
+                    try {
+                        Path relative = sourcePath.relativize(path);
+                        paths.add(relative);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path path, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        Collections.sort(paths);
+        FileTime zeroTime = FileTime.fromMillis(0L);
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile.toFile()))) {
             zipOutputStream.setLevel(Deflater.BEST_COMPRESSION);
             zipOutputStream.setMethod(ZipOutputStream.DEFLATED);
-            Files.walkFileTree(sourcePath, new FileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult postVisitDirectory(Path path, IOException exc) {
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes exc) {
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
-                        try {
-                            Path relative = sourcePath.relativize(path);
-                            ZipEntry zipEntry = new ZipEntry(relative.toString());
-                            zipOutputStream.putNextEntry(zipEntry);
-                            Files.copy(path, zipOutputStream);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult visitFileFailed(Path path, IOException exc) {
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
+            for (Path path : paths) {
+                ZipEntry zipEntry = new ZipEntry(path.toString());
+                zipEntry.setCreationTime(zeroTime);
+                zipEntry.setLastAccessTime(zeroTime);
+                zipEntry.setLastModifiedTime(zeroTime);
+                zipOutputStream.putNextEntry(zipEntry);
+                Files.copy(sourcePath.resolve(path), zipOutputStream);
+            }
         }
     }
 
@@ -338,6 +386,9 @@ public final class Main {
             byte[] hash = MessageDigest.getInstance("SHA-1").digest(b);
             String result = bytesToHex(hash);
             Files.write(target, (result + "  " + source.getFileName() + "\n").getBytes());
+            if (verbose) {
+                System.err.println(result);
+            }
         } catch (NoSuchAlgorithmException nsa) {
             throw new IllegalArgumentException(nsa);
         }
