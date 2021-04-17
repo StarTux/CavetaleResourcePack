@@ -15,6 +15,7 @@ import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -232,7 +233,19 @@ public final class Main {
         // Build the default font
         Path fontDest = dest.resolve("assets/cavetale/font");
         Files.createDirectories(fontDest);
-        Json.save(fontDest.resolve("default.json").toFile(), FontJson.ofList(DefaultFont.toList(texturePathMap)), !doObfuscate);
+        List<FontProviderJson> fontProviderList = new ArrayList<>();
+        fontProviderList.addAll(DefaultFont.toList(texturePathMap));
+        for (Mytems mytems : Mytems.values()) {
+            if (mytems.character > 0) {
+                PackPath packPath = PackPath.mytemsItem(mytems.id);
+                if (doObfuscate) packPath = texturePathMap.get(packPath);
+                if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
+                FontProviderJson it;
+                it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, Arrays.asList(mytems.character + ""));
+                fontProviderList.add(it);
+            }
+        }
+        Json.save(fontDest.resolve("default.json").toFile(), FontJson.ofList(fontProviderList), !doObfuscate);
         // Pack it up
         Path zipPath = Paths.get("target/Cavetale.zip");
         zip(zipPath, dest);
