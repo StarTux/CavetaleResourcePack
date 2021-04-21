@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 public enum DefaultFont {
-    SPACE10(PackPath.cavetaleFont("space"), -32768, -10, (char) 0xE001),
+    // Inv title to left edge
+    BACKSPACE_10(PackPath.cavetaleFont("space"), -32768, -10, (char) 0xE001),
+    // Inv right edge to title
+    BACKSPACE_171(PackPath.cavetaleFont("space"), -32768, -171, (char) 0xE002),
     RAID_REWARD(PackPath.cavetaleFont("raid_reward"), 130, 256, '\uE101'),
     EASTER_EGG(PackPath.cavetaleFont("easter_egg"), 8, 8, '\uE102'),
     EASTER_BUNNY(PackPath.mytemsItem("easter_token"), 8, 8, '\uE103'),
