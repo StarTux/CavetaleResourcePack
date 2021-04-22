@@ -13,7 +13,12 @@ public enum DefaultFont {
     RAID_REWARD(PackPath.cavetaleFont("raid_reward"), 130, 256, '\uE101'),
     EASTER_EGG(PackPath.cavetaleFont("easter_egg"), 8, 8, '\uE102'),
     EASTER_BUNNY(PackPath.mytemsItem("easter_token"), 8, 8, '\uE103'),
-    KITTY_COIN(PackPath.mytemsItem("kitty_coin"), 8, 8, '\uE104');
+    KITTY_COIN(PackPath.mytemsItem("kitty_coin"), 8, 8, '\uE104'),
+    EARTH(PackPath.mytemsItem("earth"), 7, 8, '\uE105'),
+    BRITAIN(PackPath.mytemsItem("britain"), 7, 8, '\uE106'),
+    SPAIN(PackPath.mytemsItem("spain"), 7, 8, '\uE107'),
+    MEXICO(PackPath.mytemsItem("mexico"), 7, 8, '\uE108'),
+    USA(PackPath.mytemsItem("usa"), 7, 8, '\uE109');
 
     public static final int MIN_ASCENT = -32768;
 
