@@ -18,7 +18,8 @@ public enum DefaultFont {
     BRITAIN(PackPath.mytemsItem("britain"), 7, 8, '\uE106'),
     SPAIN(PackPath.mytemsItem("spain"), 7, 8, '\uE107'),
     MEXICO(PackPath.mytemsItem("mexico"), 7, 8, '\uE108'),
-    USA(PackPath.mytemsItem("usa"), 7, 8, '\uE109');
+    USA(PackPath.mytemsItem("usa"), 7, 8, '\uE109'),
+    ADMIN(PackPath.mytemsItem("admin"), 7, 8, '\uE10A');
 
     public static final int MIN_ASCENT = -32768;
 
