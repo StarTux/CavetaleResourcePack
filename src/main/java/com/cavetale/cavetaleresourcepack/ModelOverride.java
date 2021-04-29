@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Value;
 
+/**
+ * A more practical abstraction of ModelJson.OverrideJson suited for
+ * sorting by customModelData.
+ */
 @Value
 public final class ModelOverride implements Comparable<ModelOverride> {
     protected int customModelData;

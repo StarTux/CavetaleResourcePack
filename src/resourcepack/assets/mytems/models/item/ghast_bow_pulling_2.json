@@ -1,0 +1,6 @@
+{
+    "parent": "item/bow",
+    "textures": {
+        "layer0": "mytems:item/ghast_bow_pulling_2"
+    }
+}

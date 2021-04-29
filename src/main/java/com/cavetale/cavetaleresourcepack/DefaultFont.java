@@ -14,11 +14,11 @@ public enum DefaultFont {
     EASTER_EGG(PackPath.cavetaleFont("easter_egg"), 8, 8, '\uE102'),
     EASTER_BUNNY(PackPath.mytemsItem("easter_token"), 8, 8, '\uE103'),
     KITTY_COIN(PackPath.mytemsItem("kitty_coin"), 8, 8, '\uE104'),
-    EARTH(PackPath.mytemsItem("earth"), 7, 8, '\uE105'),
-    BRITAIN(PackPath.mytemsItem("britain"), 7, 8, '\uE106'),
-    SPAIN(PackPath.mytemsItem("spain"), 7, 8, '\uE107'),
-    MEXICO(PackPath.mytemsItem("mexico"), 7, 8, '\uE108'),
-    USA(PackPath.mytemsItem("usa"), 7, 8, '\uE109'),
+    EARTH(PackPath.mytemsItem("earth"), 8, 8, '\uE105'),
+    BRITAIN(PackPath.mytemsItem("britain"), 8, 8, '\uE106'),
+    SPAIN(PackPath.mytemsItem("spain"), 8, 8, '\uE107'),
+    MEXICO(PackPath.mytemsItem("mexico"), 8, 8, '\uE108'),
+    USA(PackPath.mytemsItem("usa"), 8, 8, '\uE109'),
     ADMIN(PackPath.mytemsItem("admin"), 7, 8, '\uE10A');
 
     public static final int MIN_ASCENT = -32768;
