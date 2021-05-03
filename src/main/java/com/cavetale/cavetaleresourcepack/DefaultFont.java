@@ -15,10 +15,24 @@ public enum DefaultFont {
     EASTER_BUNNY(PackPath.mytemsItem("easter_token"), 8, 8, '\uE103'),
     KITTY_COIN(PackPath.mytemsItem("kitty_coin"), 8, 8, '\uE104'),
     EARTH(PackPath.mytemsItem("earth"), 8, 8, '\uE105'),
+    // Flags
     BRITAIN(PackPath.mytemsItem("britain"), 8, 8, '\uE106'),
     SPAIN(PackPath.mytemsItem("spain"), 8, 8, '\uE107'),
     MEXICO(PackPath.mytemsItem("mexico"), 8, 8, '\uE108'),
     USA(PackPath.mytemsItem("usa"), 8, 8, '\uE109'),
+    AUSTRIA(PackPath.mytemsItem("austria"), 8, 8, '\uE10B'),
+    BELGIUM(PackPath.mytemsItem("belgium"), 8, 8, '\uE10C'),
+    DENMARK(PackPath.mytemsItem("denmark"), 8, 8, '\uE10D'),
+    EUROPE(PackPath.mytemsItem("europe"), 8, 8, '\uE10E'),
+    FRANCE(PackPath.mytemsItem("france"), 8, 8, '\uE10F'),
+    GERMANY(PackPath.mytemsItem("germany"), 8, 8, '\uE110'),
+    IRELAND(PackPath.mytemsItem("ireland"), 8, 8, '\uE111'),
+    ITALY(PackPath.mytemsItem("italy"), 8, 8, '\uE112'),
+    NORWAY(PackPath.mytemsItem("norway"), 8, 8, '\uE113'),
+    POLAND(PackPath.mytemsItem("poland"), 8, 8, '\uE114'),
+    SWEDEN(PackPath.mytemsItem("sweden"), 8, 8, '\uE115'),
+    SWITZERLAND(PackPath.mytemsItem("switzerland"), 8, 8, '\uE116'),
+    // Ranks
     ADMIN(PackPath.mytemsItem("admin"), 7, 8, '\uE10A');
 
     public static final int MIN_ASCENT = -32768;
