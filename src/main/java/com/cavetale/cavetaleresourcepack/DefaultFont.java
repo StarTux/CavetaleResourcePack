@@ -33,7 +33,9 @@ public enum DefaultFont {
     SWEDEN(PackPath.mytemsItem("sweden"), 8, 8, '\uE115'),
     SWITZERLAND(PackPath.mytemsItem("switzerland"), 8, 8, '\uE116'),
     // Ranks
-    ADMIN(PackPath.mytemsItem("admin"), 7, 8, '\uE10A');
+    ADMIN(PackPath.mytemsItem("admin"), 7, 8, '\uE10A'),
+    MODERATOR(PackPath.mytemsItem("moderator"), 7, 8, '\uE117'),
+    TRUSTED(PackPath.mytemsItem("trusted"), 7, 8, '\uE118');
 
     public static final int MIN_ASCENT = -32768;
 
