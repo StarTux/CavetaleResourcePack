@@ -1,0 +1,59 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"particle": "mytems:item/lightsaber_hilt",
+		"hilt": "mytems:item/lightsaber_hilt",
+		"beam": "mytems:item/blue_lightsaber"
+	},
+	"elements": [
+		{
+			"name": "hilt",
+			"from": [0, 0, 0],
+			"to": [1, 4, 1],
+			"faces": {
+				"north": {"uv": [3, 3, 6, 15], "texture": "#hilt"},
+				"east": {"uv": [6, 3, 9, 15], "texture": "#hilt"},
+				"south": {"uv": [9, 3, 12, 15], "texture": "#hilt"},
+				"west": {"uv": [0, 3, 3, 15], "texture": "#hilt"},
+				"down": {"uv": [0, 0, 3, 3], "texture": "#hilt"}
+			}
+		},
+		{
+			"name": "beam",
+			"from": [0, 4, 0],
+			"to": [1, 20, 1],
+			"faces": {
+				"north": {"uv": [0, 0, 12, 16], "texture": "#beam"},
+				"east": {"uv": [0, 0, 12, 16], "texture": "#beam"},
+				"south": {"uv": [0, 0, 12, 16], "texture": "#beam"},
+				"west": {"uv": [0, 0, 12, 16], "texture": "#beam"},
+				"up": {"uv": [4, 4, 12, 12], "texture": "#beam"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [22.5, 0, 0],
+			"translation": [7.5, 3.5, 9.25]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [45, 0, 0],
+			"translation": [-7.5, 0, 10]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 0, 15],
+			"translation": [0, 4, 0]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 0, 15],
+			"translation": [-15.5, 0, 0]
+		},
+		"gui": {
+			"rotation": [0, 0, -40],
+			"translation": [4.75, -6.25, 0]
+		},
+		"fixed": {
+			"translation": [8.5, -2, 7]
+		}
+	}
+}

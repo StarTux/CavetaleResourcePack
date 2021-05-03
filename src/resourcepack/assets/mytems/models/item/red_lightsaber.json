@@ -1,0 +1,6 @@
+{
+    "parent": "mytems:item/template_lightsaber",
+    "textures": {
+	"beam": "mytems:item/red_lightsaber"
+    }
+}
