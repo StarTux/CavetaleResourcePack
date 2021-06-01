@@ -32,7 +32,8 @@ public enum DefaultFont {
     POLAND(PackPath.mytemsItem("poland"), 8, 8, '\uE114'),
     SWEDEN(PackPath.mytemsItem("sweden"), 8, 8, '\uE115'),
     SWITZERLAND(PackPath.mytemsItem("switzerland"), 8, 8, '\uE116'),
-    PRIDE_FLAG(PackPath.mytemsItem("pride_flag"), 6, 8, '\uE119'),
+    PRIDE_FLAG(PackPath.mytemsItem("pride_flag"), 7, 8, '\uE119'),
+    TRANS_PRIDE_FLAG(PackPath.mytemsItem("trans_pride_flag"), 7, 8, '\uE11A'),
     // Ranks
     ADMIN(PackPath.mytemsItem("admin"), 7, 8, '\uE10A'),
     MODERATOR(PackPath.mytemsItem("moderator"), 7, 8, '\uE117'),
