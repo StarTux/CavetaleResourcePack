@@ -7,10 +7,10 @@ import java.util.Map;
 
 public enum DefaultFont {
     // Inv title to left edge
-    BACKSPACE_10(PackPath.cavetaleFont("space"), -32768, -10, (char) 0xE001),
+    BACKSPACE_10(PackPath.cavetaleFont("space"), -32768, -10, (char) 0xE001, Policy.HIDDEN),
     // Inv right edge to title
-    BACKSPACE_171(PackPath.cavetaleFont("space"), -32768, -171, (char) 0xE002),
-    RAID_REWARD(PackPath.cavetaleFont("raid_reward"), 130, 256, '\uE101'),
+    BACKSPACE_171(PackPath.cavetaleFont("space"), -32768, -171, (char) 0xE002, Policy.HIDDEN),
+    GUI_RAID_REWARD(PackPath.cavetaleFont("raid_reward"), 130, 256, '\uE101', Policy.HIDDEN),
     EASTER_EGG(PackPath.cavetaleFont("easter_egg"), 8, 8, '\uE102'),
     EASTER_BUNNY(PackPath.mytemsItem("easter_token"), 8, 8, '\uE103'),
     KITTY_COIN(PackPath.mytemsItem("kitty_coin"), 8, 8, '\uE104'),
@@ -39,18 +39,29 @@ public enum DefaultFont {
     MODERATOR(PackPath.mytemsItem("moderator"), 7, 8, '\uE117'),
     TRUSTED(PackPath.mytemsItem("trusted"), 7, 8, '\uE118');
 
+    public enum Policy {
+        PUBLIC,
+        HIDDEN;
+    }
+
     public static final int MIN_ASCENT = -32768;
 
     public final PackPath file;
     public final int ascent;
     public final int height;
     public final char character;
+    public final Policy policy;
 
-    DefaultFont(final PackPath file, final int ascent, final int height, final char character) {
+    DefaultFont(final PackPath file, final int ascent, final int height, final char character, final Policy policy) {
         this.file = file;
         this.ascent = ascent;
         this.height = height;
         this.character = character;
+        this.policy = policy;
+    }
+
+    DefaultFont(final PackPath file, final int ascent, final int height, final char character) {
+        this(file, ascent, height, character, Policy.PUBLIC);
     }
 
     public FontProviderJson toJson(Map<PackPath, PackPath> pathMap) {
