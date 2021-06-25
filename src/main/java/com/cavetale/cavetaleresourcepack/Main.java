@@ -1,5 +1,7 @@
 package com.cavetale.cavetaleresourcepack;
 
+import com.cavetale.core.font.DefaultFont;
+import com.cavetale.core.font.VanillaItems;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsTag;
 import java.awt.image.BufferedImage;
@@ -40,6 +42,7 @@ public final class Main {
     static Map<PackPath, PackPath> modelPathMap = new HashMap<>();
     static Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
     static int nextRandomFile;
+    static Path vanillaPath = null;
 
     private Main() { }
 
@@ -56,7 +59,6 @@ public final class Main {
 
     static boolean run(String[] args) throws IOException {
         Path sourcePath = null;
-        Path vanillaPath = null;
         for (String arg : args) {
             if (arg.startsWith("--")) {
                 switch (arg.substring(2)) {
@@ -93,11 +95,12 @@ public final class Main {
                 }
             }
         }
-        makeResourcePack(sourcePath, vanillaPath);
+        makeResourcePack(sourcePath);
+        //makeVanillaItemsFont();
         return true;
     }
 
-    static void makeResourcePack(final Path source, final Path vanilla) throws IOException {
+    static void makeResourcePack(final Path source) throws IOException {
         Path dest = Paths.get("target/resourcepack");
         Files.createDirectories(dest);
         // Copy required files
@@ -174,7 +177,7 @@ public final class Main {
                 }
                 Json.save(modelDest.toFile(), minecraftModel, !doObfuscate);
             } else {
-                modelSource = vanilla.resolve(modelPath);
+                modelSource = vanillaPath.resolve(modelPath);
                 if (!Files.isRegularFile(modelSource)) {
                     System.err.println("File not found: " + modelSource);
                 }
@@ -190,17 +193,26 @@ public final class Main {
         Path fontDest = dest.resolve("assets/cavetale/font");
         Files.createDirectories(fontDest);
         List<FontProviderJson> fontProviderList = new ArrayList<>();
-        fontProviderList.addAll(DefaultFont.toList(texturePathMap));
+        fontProviderList.addAll(Fonts.toList(DefaultFont.class, texturePathMap));
+        fontProviderList.addAll(Fonts.toList(VanillaItems.class, texturePathMap));
         for (Mytems mytems : Mytems.values()) {
             if (mytems.character > 0) {
-                PackPath packPath = PackPath.mytemsItem(mytems.id);
-                if (doObfuscate) packPath = texturePathMap.get(packPath);
+                PackPath packPath;
+                switch (mytems) {
+                case RUBY:
+                    packPath = PackPath.minecraftItem(mytems.id);
+                    break;
+                default:
+                    packPath = PackPath.mytemsItem(mytems.id);
+                    if (doObfuscate) packPath = texturePathMap.get(packPath);
+                }
                 if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
                 FontProviderJson it;
                 it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, Arrays.asList(mytems.character + ""));
                 fontProviderList.add(it);
             }
         }
+        Collections.sort(fontProviderList);
         Json.save(fontDest.resolve("default.json").toFile(), FontJson.ofList(fontProviderList), !doObfuscate);
         // Pack it up
         Path zipPath = Paths.get("target/Cavetale.zip");
@@ -494,5 +506,62 @@ public final class Main {
 
     static void copyJson(final Path source, final Path dest, String filename) throws IOException {
         copyJson(source.resolve(filename), dest.resolve(filename));
+    }
+
+    /**
+     * Run this occasionally to amend the vanilla items list.
+     */
+    static void makeVanillaItemsFont() throws IOException {
+        int min = 0xE400;
+        for (VanillaItems it : VanillaItems.values()) {
+            if ((int) it.getCharacter() > min) {
+                min = (int) it.getCharacter() + 1;
+            }
+        }
+        List<Material> list = Arrays.asList(Material.values());
+        Collections.sort(list, (a, b) -> a.name().compareTo(b.name()));
+        for (Material material : list) {
+            if (material.isLegacy()) continue;
+            Path path;
+            switch (material) {
+            case TNT: path = vanillaPath.resolve("assets/minecraft/textures/item/tnt_side.png"); break;
+            default:
+                path = vanillaPath.resolve("assets/minecraft/textures/item/" + material.getKey().getKey() + ".png");
+            }
+            if (!Files.isRegularFile(path)) path = null;
+            if (path != null) {
+                BufferedImage image = ImageIO.read(path.toFile());
+                if (image.getWidth() != 16 || image.getHeight() != 16) {
+                    path = null;
+                }
+            }
+            if (path == null) {
+                path = vanillaPath.resolve("assets/minecraft/textures/block/" + material.getKey().getKey() + ".png");
+            }
+            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + material.getKey().getKey() + "_side.png");
+            if (!Files.isRegularFile(path)) path = null;
+            if (path != null) {
+                BufferedImage image = ImageIO.read(path.toFile());
+                if (image.getWidth() != 16 || image.getHeight() != 16) {
+                    path = null;
+                }
+            }
+            if (path == null) {
+                System.err.println("// Not found: " + material);
+                continue;
+            }
+            PackPath packPath = PackPath.fromPath(vanillaPath.relativize(path));
+            try {
+                VanillaItems it = VanillaItems.valueOf(material.name());
+                if (!it.getFilename().equals(packPath.toString())) {
+                    System.err.println("//" + it + " seems wrong: " + it.getFilename() + " / " + packPath.toString());
+                }
+                continue;
+            } catch (IllegalArgumentException iae) { }
+            int character = min++;
+            System.out.println(material + "(Material." + material
+                               + ", \"" + packPath.toString()
+                               + "\", 8, 8, '\\u" + Integer.toHexString(character).toUpperCase() + "'),");
+        }
     }
 }
