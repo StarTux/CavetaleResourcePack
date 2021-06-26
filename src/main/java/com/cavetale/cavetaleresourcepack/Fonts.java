@@ -15,7 +15,7 @@ public final class Fonts {
         PackPath file = PackPath.fromString(font.getFilename());
         json.setFile(pathMap.getOrDefault(file, file).toString() + ".png");
         json.setAscent(font.getAscent());
-        json.setHeight(font.getAscent());
+        json.setHeight(font.getHeight());
         json.setChars(Arrays.asList("" + font.getCharacter()));
         return json;
     }
