@@ -525,6 +525,8 @@ public final class Main {
             Path path;
             switch (material) {
             case TNT: path = vanillaPath.resolve("assets/minecraft/textures/item/tnt_side.png"); break;
+            case CLOCK: path = vanillaPath.resolve("assets/minecraft/textures/item/clock_00.png"); break;
+            case COMPASS: path = vanillaPath.resolve("assets/minecraft/textures/item/compass_16.png"); break;
             default:
                 path = vanillaPath.resolve("assets/minecraft/textures/item/" + material.getKey().getKey() + ".png");
             }
