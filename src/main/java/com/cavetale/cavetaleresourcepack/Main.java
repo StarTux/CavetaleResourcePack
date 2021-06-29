@@ -199,9 +199,6 @@ public final class Main {
             if (mytems.character > 0) {
                 PackPath packPath;
                 switch (mytems) {
-                case RUBY:
-                    packPath = PackPath.minecraftItem(mytems.id);
-                    break;
                 default:
                     packPath = PackPath.mytemsItem(mytems.id);
                     if (doObfuscate) packPath = texturePathMap.get(packPath);
