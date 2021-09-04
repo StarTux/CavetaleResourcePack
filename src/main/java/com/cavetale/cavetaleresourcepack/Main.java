@@ -43,6 +43,7 @@ public final class Main {
     static Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
     static int nextRandomFile;
     static Path vanillaPath = null;
+    static final Path SOURCE = Path.of("src/resourcepack");
 
     private Main() { }
 
@@ -50,7 +51,7 @@ public final class Main {
         if (run(args)) return;
         String usage = ""
             + "USAGE"
-            + "\n java CavetaleResourcePack OPTIONS SOURCEPATH VANILLAPATH"
+            + "\n java CavetaleResourcePack OPTIONS VANILLAPATH"
             + "\n OPTIONS"
             + "\n -o --obfuscate  obfuscate the output"
             + "\n -v --verbose    verbose output";
@@ -58,7 +59,6 @@ public final class Main {
     }
 
     static boolean run(String[] args) throws IOException {
-        Path sourcePath = null;
         for (String arg : args) {
             if (arg.startsWith("--")) {
                 switch (arg.substring(2)) {
@@ -86,30 +86,28 @@ public final class Main {
                     }
                 }
             } else {
-                if (sourcePath == null) {
-                    sourcePath = Paths.get(arg);
-                } else if (vanillaPath == null) {
+                if (vanillaPath == null) {
                     vanillaPath = Paths.get(arg);
                 } else {
                     return false;
                 }
             }
         }
-        makeResourcePack(sourcePath);
+        makeResourcePack();
         //makeVanillaItemsFont();
         return true;
     }
 
-    static void makeResourcePack(final Path source) throws IOException {
+    static void makeResourcePack() throws IOException {
         Path dest = Paths.get("target/resourcepack");
         Files.createDirectories(dest);
         // Copy required files
-        copyJson(source, dest, "pack.mcmeta");
-        copyPng(source, dest, "pack.png");
+        copyJson(SOURCE, dest, "pack.mcmeta");
+        copyPng(SOURCE, dest, "pack.png");
         // Copy (and obfuscate) textures
-        makeTextureFiles(source, dest, Paths.get("assets/mytems/textures/item"));
-        makeTextureFiles(source, dest, Paths.get("assets/cavetale/textures/font"));
-        makeModelFiles(source, dest, Paths.get("assets/mytems/models/item"));
+        makeTextureFiles(SOURCE, dest, Paths.get("assets/mytems/textures/item"));
+        makeTextureFiles(SOURCE, dest, Paths.get("assets/cavetale/textures/font"));
+        makeModelFiles(SOURCE, dest, Paths.get("assets/mytems/models/item"));
         // Build the mytems models
         for (Mytems mytems : Mytems.values()) {
             if (MytemsTag.POCKET_MOB.isTagged(mytems)) {
@@ -123,7 +121,7 @@ public final class Main {
             if (mytems.material == null) continue;
             Path modelSource;
             String modelPath = "assets/mytems/models/item/" + mytems.id + ".json";
-            modelSource = source.resolve(modelPath);
+            modelSource = SOURCE.resolve(modelPath);
             if (Files.isRegularFile(modelSource)) continue; // Already done in makeModelFiles()
             // Generate a model json file
             ModelJson modelJson = new ModelJson();
@@ -165,7 +163,7 @@ public final class Main {
             Material material = entry.getKey();
             String modelPath = "assets/minecraft/models/item/" + material.getKey().getKey() + ".json";
             Path modelDest = dest.resolve(modelPath);
-            Path modelSource = source.resolve(modelPath); // pre-written vanilla model
+            Path modelSource = SOURCE.resolve(modelPath); // pre-written vanilla model
             if (Files.isRegularFile(modelSource)) {
                 ModelJson minecraftModel = Json.load(modelSource.toFile(), ModelJson.class, ModelJson::new);
                 for (ModelJson.OverrideJson override : minecraftModel.overrides) {
