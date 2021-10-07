@@ -516,7 +516,11 @@ public final class Main {
         List<Material> list = Arrays.asList(Material.values());
         Collections.sort(list, (a, b) -> a.name().compareTo(b.name()));
         for (Material material : list) {
-            if (material.isLegacy()) continue;
+            try {
+                material.getKey();
+            } catch (IllegalArgumentException iae) {
+                continue; // material.isLegacy() is deprecated!
+            }
             Path path;
             switch (material) {
             case TNT: path = vanillaPath.resolve("assets/minecraft/textures/item/tnt_side.png"); break;
