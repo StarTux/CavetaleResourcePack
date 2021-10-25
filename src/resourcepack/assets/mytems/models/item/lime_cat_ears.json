@@ -1,0 +1,7 @@
+{
+	"parent": "mytems:item/template_cat_ears",
+	"textures": {
+		"inside": "minecraft:block/quartz_block_top",
+		"fur": "minecraft:block/lime_glazed_terracotta"
+        }
+}

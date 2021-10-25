@@ -1,0 +1,6 @@
+{
+	"parent": "mytems:item/template_sofa_left",
+	"textures": {
+		"cover": "minecraft:block/white_wool"
+        }
+}

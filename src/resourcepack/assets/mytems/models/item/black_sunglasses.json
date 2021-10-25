@@ -1,0 +1,7 @@
+{
+	"parent": "mytems:item/template_sunglasses",
+	"textures": {
+		"side": "minecraft:block/gray_concrete",
+		"glass": "minecraft:block/black_concrete"
+	}
+}

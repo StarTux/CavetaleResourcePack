@@ -1,0 +1,6 @@
+{
+	"parent": "mytems:item/template_armchair",
+	"textures": {
+		"cover": "minecraft:block/black_wool"
+	}
+}
