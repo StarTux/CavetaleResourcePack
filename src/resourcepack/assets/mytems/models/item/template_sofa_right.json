@@ -133,6 +133,7 @@
 			}
 		}
 	],
+        "gui_light": "front",
 	"display": {
 		"thirdperson_righthand": {
 			"scale": [0.25, 0.25, 0.25]

@@ -2,7 +2,7 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"cover": "mytems:block/quartz_block_bottom",
-		"foot": "mytems:block/black_concrete"
+		"foot": "minecraft:block/black_concrete"
 	},
 	"elements": [
 		{
@@ -177,6 +177,7 @@
 			}
 		}
 	],
+        "gui_light": "front",
 	"display": {
 		"thirdperson_righthand": {
 			"scale": [0.25, 0.25, 0.25]
