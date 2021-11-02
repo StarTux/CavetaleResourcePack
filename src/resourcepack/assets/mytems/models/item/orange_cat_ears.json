@@ -3,5 +3,5 @@
 	"textures": {
 		"inside": "minecraft:block/black_concrete_powder",
 		"fur": "minecraft:block/carved_pumpkin"
-        }
+	}
 }

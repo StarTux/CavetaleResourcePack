@@ -1,52 +1,53 @@
 {
 	"credit": "Made with Blockbench",
+	"parent": "mytems:item/template_hat",
 	"textures": {
-		"glass": "minecraft:block/black_concrete",
-		"side": "minecraft:block/black_concrete",
-		"highlight": "minecraft:block/quartz_block_bottom",
-		"particle": "minecraft:block/black_concrete"
+		"particle": "block/black_concrete",
+		"glass": "block/black_concrete",
+		"highlight": "block/quartz_block_bottom",
+		"side": "block/black_concrete"
 	},
 	"elements": [
 		{
 			"name": "glass_right",
 			"from": [15.5, 6, 9],
-			"to": [16, 10, 15],
+			"to": [16, 11, 15],
 			"rotation": {"angle": 0, "axis": "y", "origin": [0.5, 0.5, 0.5]},
 			"faces": {
-				"north": {"uv": [0, 0, 0.5, 2], "texture": "#glass"},
-				"east": {"uv": [0, 0, 6, 4], "texture": "#glass"},
-				"south": {"uv": [0, 0, 0.5, 2], "texture": "#glass"},
-				"west": {"uv": [0, 0, 6, 4], "texture": "#glass"},
-				"up": {"uv": [0, 0, 0.5, 4], "texture": "#glass"},
-				"down": {"uv": [0, 0, 0.5, 4], "texture": "#glass"}
+				"north": {"uv": [0, 0, 0.5, 5], "texture": "#glass"},
+				"east": {"uv": [0, 0, 6, 5], "texture": "#glass"},
+				"south": {"uv": [0, 0, 0.5, 5], "texture": "#glass"},
+				"west": {"uv": [0, 0, 6, 5], "texture": "#glass"},
+				"up": {"uv": [0, 0, 6, 0.5], "texture": "#glass"},
+				"down": {"uv": [0, 0, 6, 0.5], "texture": "#glass"}
 			}
 		},
 		{
 			"name": "glass_left",
 			"from": [15.5, 6, 1],
-			"to": [16, 10, 7],
+			"to": [16, 11, 7],
 			"rotation": {"angle": 0, "axis": "y", "origin": [0.5, 0.5, 0.5]},
 			"faces": {
 				"north": {"uv": [0, 0, 0.5, 2], "texture": "#glass"},
-				"east": {"uv": [0, 0, 6, 4], "texture": "#glass"},
+				"east": {"uv": [8, 0, 14, 5], "texture": "#glass"},
 				"south": {"uv": [0, 0, 0.5, 2], "texture": "#glass"},
-				"west": {"uv": [0, 0, 6, 4], "texture": "#glass"},
-				"up": {"uv": [0, 0, 0.5, 4], "texture": "#glass"},
-				"down": {"uv": [0, 0, 0.5, 4], "texture": "#glass"}
+				"west": {"uv": [0, 0, 6, 5], "texture": "#glass"},
+				"up": {"uv": [0, 0, 6, 0.5], "texture": "#glass"},
+				"down": {"uv": [0, 0, 6, 0.5], "texture": "#glass"}
 			}
 		},
 		{
 			"name": "temple",
-			"from": [15.5, 10, 1],
-			"to": [16, 11, 15],
+			"from": [15.5, 10, 7],
+			"to": [16, 11, 9],
 			"rotation": {"angle": 0, "axis": "y", "origin": [0.5, 0.5, 0.5]},
 			"faces": {
-				"north": {"uv": [0, 0, 0.5, 1], "texture": "#side"},
-				"east": {"uv": [0, 0, 10, 1], "texture": "#side"},
-				"south": {"uv": [0, 0, 0.5, 1], "texture": "#side"},
-				"west": {"uv": [0, 0, 10, 1], "texture": "#side"},
-				"up": {"uv": [0, 0, 0.5, 10], "texture": "#side"},
-				"down": {"uv": [0, 0, 0.5, 10], "texture": "#side"}
+				"north": {"uv": [0, 0, 0.5, 1], "texture": "#glass"},
+				"east": {"uv": [6, 0, 8, 1], "texture": "#glass"},
+				"south": {"uv": [0, 0, 0.5, 1], "texture": "#glass"},
+				"west": {"uv": [0, 0, 2, 1], "texture": "#glass"},
+				"up": {"uv": [0, 0, 0.5, 2], "texture": "#glass"},
+				"down": {"uv": [0, 0, 0.5, 2], "texture": "#glass"}
 			}
 		},
 		{
@@ -158,7 +159,6 @@
 			}
 		}
 	],
-        "gui_light": "front",
 	"display": {
 		"thirdperson_righthand": {
 			"rotation": [0, 90, 0],

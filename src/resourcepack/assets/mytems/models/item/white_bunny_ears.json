@@ -1,6 +1,6 @@
 {
     "credit": "Made with Blockbench",
-    "parent": "block/block",
+    "parent": "mytems:item/template_hat",
     "textures": {
 	"particle": "mytems:item/white_bunny_ears",
 	"ears": "mytems:item/white_bunny_ears"
@@ -58,14 +58,5 @@
 		"up": {"uv": [4, 0, 6, 2], "texture": "#ears"}
 	    }
 	}
-    ],
-    "gui_light": "front",
-    "display": {
-	"head": {
-	    "translation": [0, 13, 0]
-	},
-	"gui": {
-	    "rotation": [0, 180, 0]
-	}
-    }
+    ]
 }

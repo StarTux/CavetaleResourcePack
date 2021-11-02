@@ -1,7 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "mytems:item/magic_map",
-        "layer1": "mytems:item/magic_map_markings"
+	"layer0": "mytems:item/magic_map",
+	"layer1": "mytems:item/magic_map_markings"
     }
 }

@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"parent": "mytems:item/template_hat",
 	"textures": {
 		"1": "block/gold_block"
 	},
@@ -226,8 +227,20 @@
 			}
 		}
 	],
-        "gui_light": "front",
-	"display": {
+	"groups": [
+		{
+			"name": "Head",
+			"origin": [0.5, 0.5, 0.5],
+			"children": [
+				{
+					"name": "group",
+					"origin": [0.5, 0.5, 0.5],
+					"children": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+				}
+			]
+		}
+	],
+       "display": {
 		"thirdperson_righthand": {
 			"translation": [0, -3, -2],
 			"scale": [0.35, 0.35, 0.35]
@@ -256,18 +269,5 @@
 			"rotation": [-89, 0, 0],
 			"translation": [0, 0, 7.75]
 		}
-	},
-	"groups": [
-		{
-			"name": "Head",
-			"origin": [0.5, 0.5, 0.5],
-			"children": [
-				{
-					"name": "group",
-					"origin": [0.5, 0.5, 0.5],
-					"children": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-				}
-			]
-		}
-	]
+	}
 }

@@ -3,5 +3,5 @@
 	"textures": {
 		"inside": "minecraft:block/quartz_block_top",
 		"fur": "minecraft:block/red_shulker_box"
-        }
+	}
 }

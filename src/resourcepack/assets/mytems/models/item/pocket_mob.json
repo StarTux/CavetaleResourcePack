@@ -1,7 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "mytems:item/pocket_mob",
-        "layer1": "mytems:item/pocket_mob_overlay"
+	"layer0": "mytems:item/pocket_mob",
+	"layer1": "mytems:item/pocket_mob_overlay"
     }
 }
