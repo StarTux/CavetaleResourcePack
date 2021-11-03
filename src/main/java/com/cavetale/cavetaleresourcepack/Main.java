@@ -127,7 +127,7 @@ public final class Main {
             ModelJson modelJson = new ModelJson();
             if (mytems == Mytems.UNICORN_HORN) {
                 modelJson.parent = PackPath.of("minecraft", "block", "end_rod").toString();
-            } else if (isHandheld(mytems.material)) {
+            } else if (isHandheld(mytems)) {
                 modelJson.parent = new PackPath("minecraft", "item", "handheld").toString();
             } else {
                 modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
@@ -359,8 +359,13 @@ public final class Main {
         return Integer.toHexString(++nextRandomFile);
     }
 
-    static boolean isHandheld(Material mat) {
-        switch (mat) {
+    static boolean isHandheld(Mytems mytems) {
+        switch (mytems) {
+        case BLUNDERBUSS:
+            return true;
+        default: break;
+        }
+        switch (mytems.material) {
         case BAMBOO:
         case BLAZE_ROD:
         case BONE:
