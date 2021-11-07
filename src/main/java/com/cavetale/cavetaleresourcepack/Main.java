@@ -41,6 +41,7 @@ public final class Main {
     static Map<PackPath, PackPath> texturePathMap = new HashMap<>();
     static Map<PackPath, PackPath> modelPathMap = new HashMap<>();
     static Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
+    static Map<PackPath, BufferedImage> textureImageMap = new HashMap<>();
     static int nextRandomFile;
     static Path vanillaPath = null;
     static final Path SOURCE = Path.of("src/resourcepack");
@@ -195,15 +196,31 @@ public final class Main {
         fontProviderList.addAll(Fonts.toList(VanillaItems.class, texturePathMap));
         for (Mytems mytems : Mytems.values()) {
             if (mytems.character > 0) {
+                PackPath clearPackPath;
                 PackPath packPath;
                 switch (mytems) {
                 default:
-                    packPath = PackPath.mytemsItem(mytems.id);
-                    if (doObfuscate) packPath = texturePathMap.get(packPath);
+                    clearPackPath = PackPath.mytemsItem(mytems.id);
+                    packPath = doObfuscate
+                        ? texturePathMap.get(clearPackPath)
+                        : clearPackPath;
                 }
                 if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
                 FontProviderJson it;
-                it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, Arrays.asList(mytems.character + ""));
+                BufferedImage image = textureImageMap.get(clearPackPath);
+                if (image.getWidth() == image.getHeight()) {
+                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
+                } else {
+                    int ratio = image.getHeight() / image.getWidth();
+                    int w = image.getWidth() / 2;
+                    System.out.println(clearPackPath + ": " + ratio + ":1, " + w);
+                    List<String> list = new ArrayList<>(ratio);
+                    list.add(mytems.character + "");
+                    for (int i = 1; i < ratio; i += 1) {
+                        list.add("\u0000");
+                    }
+                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
+                }
                 fontProviderList.add(it);
             }
         }
@@ -266,7 +283,8 @@ public final class Main {
                 }
                 texturePathMap.put(packPath, packPathValue);
                 try {
-                    copyPng(local, dest.resolve(packPathValue.toPath("textures", ".png")));
+                    BufferedImage image = copyPng(local, dest.resolve(packPathValue.toPath("textures", ".png")));
+                    textureImageMap.put(packPath, image);
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
@@ -480,18 +498,19 @@ public final class Main {
         return new String(hexChars);
     }
 
-    static void copyPng(final Path source, final Path dest) throws IOException {
+    static BufferedImage copyPng(final Path source, final Path dest) throws IOException {
         Files.createDirectories(dest.getParent());
+        BufferedImage image = ImageIO.read(source.toFile());
         if (!doObfuscate) {
             Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
-            return;
+            return image;
         }
-        BufferedImage image = ImageIO.read(source.toFile());
         ImageIO.write(image, "png", dest.toFile());
+        return image;
     }
 
-    static void copyPng(final Path source, final Path dest, String filename) throws IOException {
-        copyPng(source.resolve(filename), dest.resolve(filename));
+    static BufferedImage copyPng(final Path source, final Path dest, String filename) throws IOException {
+        return copyPng(source.resolve(filename), dest.resolve(filename));
     }
 
     static void copyJson(final Path source, final Path dest) throws IOException {
