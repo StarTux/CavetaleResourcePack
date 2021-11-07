@@ -1,0 +1,7 @@
+{
+	"parent": "mytems:item/template_witch_hat",
+	"textures": {
+		"band": "minecraft:block/gray_wool",
+		"hat": "minecraft:block/black_shulker_box"
+	}
+}

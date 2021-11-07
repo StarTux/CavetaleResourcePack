@@ -1,0 +1,6 @@
+{
+	"parent": "mytems:item/template_witch_hat",
+	"textures": {
+		"hat": "minecraft:block/pink_shulker_box"
+	}
+}
