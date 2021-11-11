@@ -26,7 +26,7 @@ public final class Fonts {
         Map<String, FontProviderJson> filenameMap = new HashMap<>();
         for (Font it : fontClass.getEnumConstants()) {
             FontProviderJson json = filenameMap.get(it.getFilename());
-            if (json != null) {
+            if (json != null && it.getHeight() > 0) {
                 json.getChars().add("" + it.getCharacter());
             } else {
                 json = toJson(it, pathMap);
