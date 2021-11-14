@@ -378,6 +378,11 @@ public final class Main {
     }
 
     static boolean isHandheld(Mytems mytems) {
+        switch (mytems.category) {
+        case PAINTBRUSH:
+            return false;
+        default: break;
+        }
         switch (mytems) {
         case BLUNDERBUSS:
             return true;
