@@ -1,5 +1,5 @@
 {
-    "parent": "block/block",
+    "parent": "mytems:item/template_small_armor_stand_block",
     "textures": {
 	"front": "mytems:item/boss_chest_front",
 	"top": "mytems:item/boss_chest_top",

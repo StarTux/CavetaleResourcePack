@@ -1,5 +1,5 @@
 {
-    "parent": "block/block",
+    "parent": "mytems:item/template_small_armor_stand_block",
     "textures": {
 	"lid": "block/stripped_dark_oak_log",
 	"particle": "block/white_concrete",
@@ -201,7 +201,6 @@
 	    }
 	}
     ],
-    "gui_light": "front",
     "display": {
 	"fixed": {
 	    "translation": [0, 0, -16],

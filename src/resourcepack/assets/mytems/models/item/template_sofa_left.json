@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"parent": "mytems:item/template_small_armor_stand_block",
 	"textures": {
 		"cover": "minecraft:block/quartz_block_bottom",
 		"foot": "minecraft:block/black_concrete"
@@ -134,27 +135,6 @@
 			}
 		}
 	],
-	"gui_light": "front",
-	"display": {
-		"thirdperson_righthand": {
-			"scale": [0.25, 0.25, 0.25]
-		},
-		"ground": {
-			"translation": [0, -1.5, 0],
-			"scale": [0.25, 0.25, 0.25]
-		},
-		"gui": {
-			"rotation": [22.5, -157.5, 0],
-			"scale": [0.75, 0.75, 0.75]
-		},
-		"head": {
-			"translation": [0, -14.65, 0],
-			"scale": [2.2855, 2.2855, 2.2855]
-		},
-		"fixed": {
-			"translation": [0, 0, -8]
-		}
-	},
 	"groups": [
 		{
 			"name": "Bottom",
