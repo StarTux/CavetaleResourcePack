@@ -174,6 +174,7 @@ public final class Main {
                         override.model = obfuscated.toString();
                     }
                 }
+                Files.createDirectories(modelDest.getParent());
                 Json.save(modelDest.toFile(), minecraftModel, !doObfuscate);
             } else {
                 modelSource = vanillaPath.resolve(modelPath);

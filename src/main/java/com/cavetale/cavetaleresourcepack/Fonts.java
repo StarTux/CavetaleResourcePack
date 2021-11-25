@@ -2,7 +2,6 @@ package com.cavetale.cavetaleresourcepack;
 
 import com.cavetale.core.font.Font;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
