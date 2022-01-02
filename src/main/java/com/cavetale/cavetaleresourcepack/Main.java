@@ -556,6 +556,8 @@ public final class Main {
             case TNT: path = vanillaPath.resolve("assets/minecraft/textures/item/tnt_side.png"); break;
             case CLOCK: path = vanillaPath.resolve("assets/minecraft/textures/item/clock_00.png"); break;
             case COMPASS: path = vanillaPath.resolve("assets/minecraft/textures/item/compass_16.png"); break;
+            case SMALL_DRIPLEAF: path = vanillaPath.resolve("assets/minecraft/textures/block/small_dripleaf_stem_bottom.png"); break;
+            case BIG_DRIPLEAF: path = vanillaPath.resolve("assets/minecraft/textures/block/big_dripleaf_top.png"); break;
             default:
                 path = vanillaPath.resolve("assets/minecraft/textures/item/" + material.getKey().getKey() + ".png");
             }
