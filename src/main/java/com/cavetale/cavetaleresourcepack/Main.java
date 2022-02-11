@@ -3,7 +3,7 @@ package com.cavetale.cavetaleresourcepack;
 import com.cavetale.core.font.DefaultFont;
 import com.cavetale.core.font.VanillaItems;
 import com.cavetale.mytems.Mytems;
-import com.cavetale.mytems.MytemsTag;
+import com.cavetale.mytems.MytemsCategory;
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -111,7 +111,7 @@ public final class Main {
         makeModelFiles(SOURCE, dest, Paths.get("assets/mytems/models/item"));
         // Build the mytems models
         for (Mytems mytems : Mytems.values()) {
-            if (MytemsTag.POCKET_MOB.isTagged(mytems)) {
+            if (mytems.category == MytemsCategory.POCKET_MOB) {
                 PackPath packPath = PackPath.mytemsItem("pocket_mob");
                 if (doObfuscate) packPath = modelPathMap.get(packPath);
                 materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
