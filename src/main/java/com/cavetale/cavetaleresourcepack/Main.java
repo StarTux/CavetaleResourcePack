@@ -258,9 +258,11 @@ public final class Main {
                     int w = image.getWidth() / 2;
                     System.out.println(clearPackPath + ": " + ratio + ":1, " + w);
                     List<String> list = new ArrayList<>(ratio);
-                    list.add(mytems.character + "");
-                    for (int i = 1; i < ratio; i += 1) {
-                        list.add("\u0000");
+                    int glyphIndex = mytems.category == MytemsCategory.COIN ? 2 : 0;
+                    for (int i = 0; i < ratio; i += 1) {
+                        list.add(i == glyphIndex
+                                 ? mytems.character + ""
+                                 : "\u0000");
                     }
                     it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
                 }
