@@ -136,6 +136,8 @@ public final class Main {
             ModelJson modelJson = new ModelJson();
             if (mytems == Mytems.UNICORN_HORN) {
                 modelJson.parent = PackPath.of("minecraft", "block", "end_rod").toString();
+            } else if (mytems.material == Material.SHIELD) {
+                modelJson.parent = PackPath.of("mytems", "item", "template_shield").toString();
             } else if (isHandheld(mytems)) {
                 modelJson.parent = new PackPath("minecraft", "item", "handheld").toString();
             } else {
