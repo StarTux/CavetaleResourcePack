@@ -137,7 +137,8 @@ public final class Main {
             if (mytems == Mytems.UNICORN_HORN) {
                 modelJson.parent = PackPath.of("minecraft", "block", "end_rod").toString();
             } else if (mytems.material == Material.SHIELD) {
-                modelJson.parent = PackPath.of("mytems", "item", "template_shield").toString();
+                PackPath path = PackPath.of("mytems", "item", "template_shield");
+                modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
             } else if (isHandheld(mytems)) {
                 modelJson.parent = new PackPath("minecraft", "item", "handheld").toString();
             } else {
@@ -159,7 +160,7 @@ public final class Main {
             if (doObfuscate) {
                 PackPath obfuscated = PackPath.mytemsItem(randomFileName());
                 if (verbose) {
-                    System.err.println("model " + modelPackPath + " => " + obfuscated);
+                    System.err.println("buildMytemModels " + modelPackPath + " => " + obfuscated);
                 }
                 modelPathMap.put(modelPackPath, obfuscated);
                 modelPackPath = obfuscated;
@@ -258,7 +259,7 @@ public final class Main {
                 } else {
                     int ratio = image.getHeight() / image.getWidth();
                     int w = image.getWidth() / 2;
-                    System.out.println(clearPackPath + ": " + ratio + ":1, " + w);
+                    System.out.println("buildDefaultFont " + clearPackPath + ": " + ratio + ":1, " + w);
                     List<String> list = new ArrayList<>(ratio);
                     int glyphIndex = mytems.category == MytemsCategory.COIN ? 2 : 0;
                     for (int i = 0; i < ratio; i += 1) {
@@ -322,7 +323,7 @@ public final class Main {
                 PackPath packPath = PackPath.fromPath(relative2);
                 PackPath packPathValue = doObfuscate ? packPath.withName(randomFileName()) : packPath;
                 if (verbose) {
-                    System.err.println("texture " + packPath + " => " + packPathValue);
+                    System.err.println("makeTextureFiles " + packPath + " => " + packPathValue);
                 }
                 texturePathMap.put(packPath, packPathValue);
                 try {
@@ -378,6 +379,9 @@ public final class Main {
             PackPath modelPackPath = PackPath.fromPath(path);
             if (doObfuscate) {
                 PackPath obfuscated = modelPackPath.withName(randomFileName());
+                if (verbose) {
+                    System.out.println("copyExistingModelFiles " + modelPackPath + " => " + obfuscated);
+                }
                 modelPathMap.put(modelPackPath, obfuscated);
             }
             for (String key : modelJson.getTextureKeys()) {
@@ -409,7 +413,7 @@ public final class Main {
             name = name.substring(0, name.length() - 5); // strip .json
             Mytems mytems = Mytems.forId(name);
             if (verbose) {
-                System.out.println("DEBUG " + path + " : " + mytems);
+                System.out.println("copyExistingModelFiles2 " + path + " : " + mytems);
             }
             if (mytems != null && mytems.material != null) {
                 materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
