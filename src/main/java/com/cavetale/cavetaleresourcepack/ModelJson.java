@@ -27,14 +27,20 @@ public final class ModelJson {
 
     public void addOverrides(List<ModelOverride> overrideList) {
         List<OverrideJson> newOverrides = new ArrayList<>();
+        if (this.overrides != null) {
+            newOverrides.addAll(this.overrides);
+        }
         for (ModelOverride override : overrideList) {
             OverrideJson obj = new OverrideJson();
             obj.predicate.put("custom_model_data", override.customModelData);
+            if (override.bowPulling != null) {
+                obj.predicate.put("pulling", override.bowPulling);
+            }
+            if (override.bowPull != null) {
+                obj.predicate.put("pull", override.bowPull);
+            }
             obj.model = override.item.toString();
             newOverrides.add(obj);
-        }
-        if (this.overrides != null) {
-            newOverrides.addAll(this.overrides);
         }
         this.overrides = newOverrides;
     }

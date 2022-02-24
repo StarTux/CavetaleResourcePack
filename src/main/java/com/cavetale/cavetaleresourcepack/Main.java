@@ -108,8 +108,16 @@ public final class Main {
         // Copy (and obfuscate) textures
         makeTextureFiles(SOURCE, dest, Paths.get("assets/mytems/textures/item"));
         makeTextureFiles(SOURCE, dest, Paths.get("assets/cavetale/textures/font"));
-        makeModelFiles(SOURCE, dest, Paths.get("assets/mytems/models/item"));
-        // Build the mytems models
+        copyExistingModelFiles(SOURCE, dest, Paths.get("assets/mytems/models/item"));
+        buildMytemModels(dest);
+        buildDefaultFont(dest);
+        // Pack it up
+        Path zipPath = Paths.get("target/Cavetale.zip");
+        zip(zipPath, dest);
+        sha1sum(zipPath, Paths.get("target/Cavetale.zip.sha1"));
+    }
+
+    static void buildMytemModels(Path dest) throws IOException {
         for (Mytems mytems : Mytems.values()) {
             if (mytems.category == MytemsCategory.POCKET_MOB) {
                 PackPath packPath = PackPath.mytemsItem("pocket_mob");
@@ -123,7 +131,7 @@ public final class Main {
             Path modelSource;
             String modelPath = "assets/mytems/models/item/" + mytems.id + ".json";
             modelSource = SOURCE.resolve(modelPath);
-            if (Files.isRegularFile(modelSource)) continue; // Already done in makeModelFiles()
+            if (Files.isRegularFile(modelSource)) continue; // Already done in copyExistingModelFiles()
             // Generate a model json file
             ModelJson modelJson = new ModelJson();
             if (mytems == Mytems.UNICORN_HORN) {
@@ -153,12 +161,44 @@ public final class Main {
                 }
                 modelPathMap.put(modelPackPath, obfuscated);
                 modelPackPath = obfuscated;
+            } else {
+                modelPathMap.put(modelPackPath, modelPackPath);
             }
             Path modelDest = dest.resolve(modelPackPath.toPath("models", ".json"));
             Files.createDirectories(modelDest.getParent());
             Json.save(modelDest.toFile(), modelJson, !doObfuscate);
             materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
                 .add(new ModelOverride(mytems.customModelData, modelPackPath));
+            if (mytems.material == Material.BOW) {
+                // Bow pulling special case
+                System.out.println("Bow: " + mytems);
+                double[] pulls = {0.0, 0.65, 0.9};
+                for (int i = 0; i < pulls.length; i += 1) {
+                    PackPath bowPullingTexturePath = PackPath.mytemsItem(mytems.id + "_pulling_" + i);
+                    if (!texturePathMap.containsKey(bowPullingTexturePath)) break; // texture must exist!
+                    PackPath bowPullingModelPath = PackPath.mytemsItem(mytems.id + "_pulling_" + i);
+                    if (doObfuscate) bowPullingTexturePath = texturePathMap.getOrDefault(bowPullingTexturePath, bowPullingTexturePath);
+                    boolean modelExists = modelPathMap.containsKey(bowPullingModelPath);
+                    if (doObfuscate) bowPullingModelPath = modelPathMap.getOrDefault(bowPullingModelPath, bowPullingModelPath);
+                    if (!modelExists) { // make model if necessary
+                        if (doObfuscate) {
+                            PackPath tmp = PackPath.mytemsItem(randomFileName());
+                            modelPathMap.put(bowPullingModelPath, tmp);
+                            bowPullingModelPath = tmp;
+                        }
+                        ModelJson bowPullingModelJson = new ModelJson();
+                        bowPullingModelJson.parent = "item/generated";
+                        bowPullingModelJson.setTexture("layer0", bowPullingTexturePath.toString());
+                        Path bowPullingModelDest = dest.resolve(bowPullingModelPath.toPath("models", ".json"));
+                        Files.createDirectories(bowPullingModelDest.getParent());
+                        Json.save(bowPullingModelDest.toFile(), bowPullingModelJson, !doObfuscate);
+                    }
+                    ModelOverride bowPullingOverride = new ModelOverride(mytems.customModelData, bowPullingModelPath);
+                    bowPullingOverride.setBowPulling(1.0);
+                    if (i != 0) bowPullingOverride.setBowPull(pulls[i]);
+                    materialOverridesMap.get(mytems.material).add(bowPullingOverride);
+                }
+            }
         }
         for (Map.Entry<Material, List<ModelOverride>> entry : materialOverridesMap.entrySet()) {
             Material material = entry.getKey();
@@ -189,7 +229,9 @@ public final class Main {
                 Json.save(modelDest.toFile(), minecraftModel, !doObfuscate);
             }
         }
-        // Build the default font
+    }
+
+    static void buildDefaultFont(Path dest) throws IOException {
         Path fontDest = dest.resolve("assets/cavetale/font");
         Files.createDirectories(fontDest);
         List<FontProviderJson> fontProviderList = new ArrayList<>();
@@ -227,10 +269,6 @@ public final class Main {
         }
         Collections.sort(fontProviderList);
         Json.save(fontDest.resolve("default.json").toFile(), FontJson.ofList(fontProviderList), !doObfuscate);
-        // Pack it up
-        Path zipPath = Paths.get("target/Cavetale.zip");
-        zip(zipPath, dest);
-        sha1sum(zipPath, Paths.get("target/Cavetale.zip.sha1"));
     }
 
     /**
@@ -305,7 +343,7 @@ public final class Main {
      * Find all existing mytems model files and copy them. Obfuscate if desired.
      * This will flatten the target model namespace.
      */
-    static void makeModelFiles(Path source, Path dest, Path relative) throws IOException {
+    static void copyExistingModelFiles(Path source, Path dest, Path relative) throws IOException {
         Map<Path, String> pathMap = new HashMap<>();
         Files.walkFileTree(source.resolve(relative), new FileVisitor<Path>() {
                 @Override public FileVisitResult postVisitDirectory(Path path, IOException exc) {
@@ -366,7 +404,9 @@ public final class Main {
             String name = pathMap.get(path);
             name = name.substring(0, name.length() - 5); // strip .json
             Mytems mytems = Mytems.forId(name);
-            System.out.println("DEBUG " + path + " : " + mytems);
+            if (verbose) {
+                System.out.println("DEBUG " + path + " : " + mytems);
+            }
             if (mytems != null && mytems.material != null) {
                 materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
                     .add(new ModelOverride(mytems.customModelData, modelPackPath));
