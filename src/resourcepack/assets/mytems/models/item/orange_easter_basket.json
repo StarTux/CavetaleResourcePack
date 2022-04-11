@@ -1,5 +1,5 @@
 {
-    "parent": "mytems:item/template_easter_egg",
+    "parent": "mytems:item/template_easter_basket",
     "textures": {
 	"egg": "mytems:item/orange_easter_egg",
 	"nest": "minecraft:block/brain_coral_fan"
