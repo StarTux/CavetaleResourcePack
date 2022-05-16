@@ -38,6 +38,7 @@ public final class Main {
     private static Set<String> usedNames = new HashSet<>();
     static boolean doObfuscate = false;
     static boolean verbose = false;
+    static boolean doMakeVanillaItems = false;
     static Map<PackPath, PackPath> texturePathMap = new HashMap<>();
     static Map<PackPath, PackPath> modelPathMap = new HashMap<>();
     static Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
@@ -54,8 +55,9 @@ public final class Main {
             + "USAGE"
             + "\n java CavetaleResourcePack OPTIONS VANILLAPATH"
             + "\n OPTIONS"
-            + "\n -o --obfuscate  obfuscate the output"
-            + "\n -v --verbose    verbose output";
+            + "\n -o --obfuscate  Obfuscate the output"
+            + "\n -v --verbose    Verbose output"
+            + "\n --vanillaitems  Make vanilla items";
         System.out.println(usage);
     }
 
@@ -68,6 +70,9 @@ public final class Main {
                     break;
                 case "verbose":
                     verbose = true;
+                    break;
+                case "vanillaitems":
+                    doMakeVanillaItems = true;
                     break;
                 default:
                     return false;
@@ -94,8 +99,11 @@ public final class Main {
                 }
             }
         }
-        makeResourcePack();
-        //makeVanillaItemsFont();
+        if (doMakeVanillaItems) {
+            makeVanillaItemsFont();
+        } else {
+            makeResourcePack();
+        }
         return true;
     }
 
@@ -587,27 +595,39 @@ public final class Main {
     static void makeVanillaItemsFont() throws IOException {
         int min = 0xE400;
         for (VanillaItems it : VanillaItems.values()) {
-            if ((int) it.getCharacter() > min) {
+            if ((int) it.getCharacter() >= min) {
                 min = (int) it.getCharacter() + 1;
             }
         }
         List<Material> list = Arrays.asList(Material.values());
         Collections.sort(list, (a, b) -> a.name().compareTo(b.name()));
         for (Material material : list) {
-            try {
-                material.getKey();
-            } catch (IllegalArgumentException iae) {
-                continue; // material.isLegacy() is deprecated!
+            if (!material.isItem()) continue;
+            if (material.isLegacy()) continue;
+            if (material.isAir()) continue;
+            VanillaItems vanillaItems = VanillaItems.of(material);
+            if (vanillaItems != null) {
+                PackPath packPath = PackPath.fromString(vanillaItems.getFilename());
+                Path path = vanillaPath.resolve(packPath.toPath("textures", ".png"));
+                if (!Files.isRegularFile(path)) {
+                    System.err.println("//" + vanillaItems + " seems wrong: " + vanillaItems.getFilename() + " / " + packPath.toString());
+                }
             }
             Path path;
+            String key = material.getKey().getKey();
             switch (material) {
             case TNT: path = vanillaPath.resolve("assets/minecraft/textures/item/tnt_side.png"); break;
             case CLOCK: path = vanillaPath.resolve("assets/minecraft/textures/item/clock_00.png"); break;
             case COMPASS: path = vanillaPath.resolve("assets/minecraft/textures/item/compass_16.png"); break;
             case SMALL_DRIPLEAF: path = vanillaPath.resolve("assets/minecraft/textures/block/small_dripleaf_stem_bottom.png"); break;
             case BIG_DRIPLEAF: path = vanillaPath.resolve("assets/minecraft/textures/block/big_dripleaf_top.png"); break;
+            case SMOOTH_RED_SANDSTONE: path = vanillaPath.resolve("assets/minecraft/textures/block/red_sandstone_top.png"); break;
+            case SMOOTH_SANDSTONE: path = vanillaPath.resolve("assets/minecraft/textures/block/sandstone_top.png"); break;
+            case SMOOTH_QUARTZ: path = vanillaPath.resolve("assets/minecraft/textures/block/quartz_block_bottom.png"); break;
+            case STICKY_PISTON: path = vanillaPath.resolve("assets/minecraft/textures/block/piston_top_sticky.png"); break;
+            case LECTERN: path = vanillaPath.resolve("assets/minecraft/textures/block/lectern_top.png"); break;
             default:
-                path = vanillaPath.resolve("assets/minecraft/textures/item/" + material.getKey().getKey() + ".png");
+                path = vanillaPath.resolve("assets/minecraft/textures/item/" + key + ".png");
             }
             if (!Files.isRegularFile(path)) path = null;
             if (path != null) {
@@ -617,32 +637,42 @@ public final class Main {
                 }
             }
             if (path == null) {
-                path = vanillaPath.resolve("assets/minecraft/textures/block/" + material.getKey().getKey() + ".png");
+                path = vanillaPath.resolve("assets/minecraft/textures/block/" + key + ".png");
             }
-            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + material.getKey().getKey() + "_side.png");
+            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + key + "_front.png");
+            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + key + "_side.png");
+            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + key + "_side0.png");
+            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + key + "_side1.png");
+            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + key + "_top.png");
+            if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/item/" + key + "_base.png");
+            if (!Files.isRegularFile(path) && key.endsWith("_block")) {
+                String sub = key.substring(0, key.length() - 6);
+                if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + sub + ".png");
+                if (!Files.isRegularFile(path)) path = vanillaPath.resolve("assets/minecraft/textures/block/" + sub + "_top.png");
+            }
             if (!Files.isRegularFile(path)) path = null;
-            if (path != null) {
-                BufferedImage image = ImageIO.read(path.toFile());
-                if (image.getWidth() != 16 || image.getHeight() != 16) {
-                    path = null;
-                }
-            }
             if (path == null) {
-                System.err.println("// Not found: " + material);
+                if (vanillaItems == null) {
+                    System.err.println("// Nothing found: " + material);
+                }
                 continue;
             }
+            BufferedImage image = ImageIO.read(path.toFile());
+            if (image.getWidth() != 16) {
+                System.err.println("// Spurious size: " + material + ": " + image.getWidth());
+            }
+            int scale = image.getHeight() / image.getWidth();
             PackPath packPath = PackPath.fromPath(vanillaPath.relativize(path));
-            try {
-                VanillaItems it = VanillaItems.valueOf(material.name());
-                if (!it.getFilename().equals(packPath.toString())) {
-                    System.err.println("//" + it + " seems wrong: " + it.getFilename() + " / " + packPath.toString());
+            if (vanillaItems != null) {
+                if (!vanillaItems.filename.equals(packPath.toString())) {
+                    System.err.println("// " + vanillaItems + " Changed: " + vanillaItems.getFilename() + " => " + packPath.toString());
                 }
                 continue;
-            } catch (IllegalArgumentException iae) { }
+            }
             int character = min++;
             System.out.println(material + "(Material." + material
                                + ", \"" + packPath.toString()
-                               + "\", 8, 8, '\\u" + Integer.toHexString(character).toUpperCase() + "'),");
+                               + "\", 8, 8, " + scale + ", '\\u" + Integer.toHexString(character).toUpperCase() + "'),");
         }
     }
 }

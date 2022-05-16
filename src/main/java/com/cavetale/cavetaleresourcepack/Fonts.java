@@ -16,7 +16,12 @@ public final class Fonts {
         json.setFile(pathMap.getOrDefault(file, file).toString() + ".png");
         json.setAscent(font.getAscent());
         json.setHeight(font.getHeight());
-        json.setChars(new ArrayList<>(List.of("" + font.getCharacter())));
+        List<String> chars = new ArrayList<>();
+        chars.add("" + font.getCharacter());
+        for (int i = 1; i < font.getRows(); i += 1) {
+            chars.add("\u0000");
+        }
+        json.setChars(chars);
         return json;
     }
 
