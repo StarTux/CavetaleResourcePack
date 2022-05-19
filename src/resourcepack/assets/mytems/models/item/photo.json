@@ -1,0 +1,7 @@
+{
+    "parent": "item/generated",
+    "textures": {
+	"layer0": "mytems:item/photo",
+	"layer1": "mytems:item/photo_markings"
+    }
+}
