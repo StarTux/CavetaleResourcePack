@@ -1,7 +1,9 @@
 package com.cavetale.cavetaleresourcepack;
 
 import com.cavetale.core.font.DefaultFont;
+import com.cavetale.core.font.VanillaEffects;
 import com.cavetale.core.font.VanillaItems;
+import com.cavetale.core.font.VanillaPaintings;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsCategory;
 import java.awt.image.BufferedImage;
@@ -247,6 +249,8 @@ public final class Main {
         Files.createDirectories(fontDest);
         List<FontProviderJson> fontProviderList = new ArrayList<>();
         fontProviderList.addAll(Fonts.toList(DefaultFont.class, texturePathMap));
+        fontProviderList.addAll(Fonts.toList(VanillaEffects.class, texturePathMap));
+        fontProviderList.addAll(Fonts.toList(VanillaPaintings.class, texturePathMap));
         fontProviderList.addAll(Fonts.toList(VanillaItems.class, texturePathMap));
         for (Mytems mytems : Mytems.values()) {
             if (mytems.character > 0) {
