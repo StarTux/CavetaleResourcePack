@@ -39,6 +39,9 @@ public final class ModelJson {
             if (override.bowPull != null) {
                 obj.predicate.put("pull", override.bowPull);
             }
+            if (override.blocking != null) {
+                obj.predicate.put("blocking", override.blocking);
+            }
             obj.model = override.item.toString();
             newOverrides.add(obj);
         }

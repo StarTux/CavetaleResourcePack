@@ -211,6 +211,29 @@ public final class Main {
                     if (i != 0) bowPullingOverride.setBowPull(pulls[i]);
                     materialOverridesMap.get(mytems.material).add(bowPullingOverride);
                 }
+            } else if (mytems.material == Material.SHIELD) {
+                // Shield blocking
+                System.out.println("Shield: " + mytems);
+                PackPath shieldBlockingModelPath = PackPath.mytemsItem(mytems.id + "_blocking");
+                boolean modelExists = modelPathMap.containsKey(shieldBlockingModelPath);
+                if (doObfuscate) shieldBlockingModelPath = modelPathMap.getOrDefault(shieldBlockingModelPath, shieldBlockingModelPath);
+                if (!modelExists) { // make model if necessary
+                    if (doObfuscate) {
+                        PackPath tmp = PackPath.mytemsItem(randomFileName());
+                        modelPathMap.put(shieldBlockingModelPath, tmp);
+                        shieldBlockingModelPath = tmp;
+                    }
+                    ModelJson shieldBlockingModelJson = new ModelJson();
+                    PackPath templateShieldBlockingPath = PackPath.mytemsItem("template_shield_blocking");
+                    shieldBlockingModelJson.parent = modelPathMap.getOrDefault(templateShieldBlockingPath, templateShieldBlockingPath).toString();
+                    shieldBlockingModelJson.setTexture("layer0", texturePath.toString());
+                    Path shieldBlockingModelDest = dest.resolve(shieldBlockingModelPath.toPath("models", ".json"));
+                    Files.createDirectories(shieldBlockingModelDest.getParent());
+                    Json.save(shieldBlockingModelDest.toFile(), shieldBlockingModelJson, !doObfuscate);
+                }
+                ModelOverride shieldBlockingOverride = new ModelOverride(mytems.customModelData, shieldBlockingModelPath);
+                shieldBlockingOverride.setBlocking(1.0);
+                materialOverridesMap.get(mytems.material).add(shieldBlockingOverride);
             }
         }
         for (Map.Entry<Material, List<ModelOverride>> entry : materialOverridesMap.entrySet()) {

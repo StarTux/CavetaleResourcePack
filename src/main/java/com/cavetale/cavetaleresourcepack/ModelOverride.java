@@ -13,6 +13,7 @@ public final class ModelOverride implements Comparable<ModelOverride> {
     protected final PackPath item;
     protected Double bowPulling;
     protected Double bowPull;
+    protected Double blocking;
 
     @Override
     public int compareTo(ModelOverride other) {
