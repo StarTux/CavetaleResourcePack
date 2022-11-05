@@ -291,6 +291,18 @@ public final class Main {
                 BufferedImage image = textureImageMap.get(clearPackPath);
                 if (image.getWidth() == image.getHeight()) {
                     it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
+                } else if (mytems.animation.length > 1) {
+                    int ratio = image.getHeight() / image.getWidth();
+                    if (mytems.animation.length != ratio) {
+                        throw new IllegalStateException(mytems + ": " + mytems.animation.length + " != " + ratio);
+                    }
+                    int w = image.getWidth() / 2;
+                    System.out.println("buildDefaultFont animation " + clearPackPath + ": " + ratio + ":1, " + w);
+                    List<String> list = new ArrayList<>(ratio);
+                    for (char chr : mytems.animation) {
+                        list.add("" + chr);
+                    }
+                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
                 } else {
                     int ratio = image.getHeight() / image.getWidth();
                     int w = image.getWidth() / 2;
