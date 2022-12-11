@@ -115,12 +115,15 @@ public final class Main {
         // Copy required files
         copyJson(SOURCE, dest, "pack.mcmeta");
         copyPng(SOURCE, dest, "pack.png");
+        copyPng(SOURCE, dest, "assets/minecraft/textures/gui/toasts.png");
+        copyJson(SOURCE, dest, "assets/minecraft/lang/en_us.json");
         // Copy (and obfuscate) textures
         makeTextureFiles(SOURCE, dest, Paths.get("assets/mytems/textures/item"));
         makeTextureFiles(SOURCE, dest, Paths.get("assets/cavetale/textures/font"));
         copyExistingModelFiles(SOURCE, dest, Paths.get("assets/mytems/models/item"));
         buildMytemModels(dest);
         buildDefaultFont(dest);
+        copyFontJson(SOURCE, dest, "assets/minecraft/font/default.json");
         // Pack it up
         Path zipPath = Paths.get("target/Cavetale.zip");
         zip(zipPath, dest);
@@ -626,6 +629,31 @@ public final class Main {
 
     static void copyJson(final Path source, final Path dest, String filename) throws IOException {
         copyJson(source.resolve(filename), dest.resolve(filename));
+    }
+
+    /**
+     * Copy a JSON file containing a font, translating all file
+     * references to their obfuscated counterparts.
+     */
+    static void copyFontJson(final Path source, final Path dest, String filename) throws IOException {
+        if (!doObfuscate) {
+            copyJson(source, dest, filename);
+        } else {
+            FontJson json = Json.load(source.resolve(filename).toFile(), FontJson.class);
+            for (FontProviderJson provider : json.providers) {
+                String sourceFileName = provider.file;
+                sourceFileName = sourceFileName.substring(0, sourceFileName.length() - 4); // strip .png
+                final PackPath sourceFile = PackPath.fromString(sourceFileName);
+                final PackPath destFile = texturePathMap.get(sourceFile);
+                if (destFile == null) {
+                    throw new IllegalStateException("Unknown PackPath: " + sourceFile);
+                }
+                provider.file = destFile.toString() + ".png";
+            }
+            Path destPath = dest.resolve(filename);
+            Files.createDirectories(destPath.getParent());
+            Json.save(destPath.toFile(), json);
+        }
     }
 
     /**
