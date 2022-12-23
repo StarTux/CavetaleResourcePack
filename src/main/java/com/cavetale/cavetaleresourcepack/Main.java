@@ -129,8 +129,8 @@ public final class Main {
         final Path sha1Path = Paths.get("target/Cavetale.zip.sha1");
         zip(zipPath, dest);
         String sha1 = sha1sum(zipPath, sha1Path);
-        Files.createSymbolicLink(Paths.get("target/" + sha1 + ".zip"), Paths.get("Cavetale.zip"));
-        Files.createSymbolicLink(Paths.get("target/" + sha1 + ".zip.sha1"), Paths.get("Cavetale.zip.sha1"));
+        Files.copy(zipPath, Paths.get("target/" + sha1 + ".zip"));
+        Files.copy(sha1Path, Paths.get("target/" + sha1 + ".zip.sha1"));
     }
 
     static void buildMytemModels(Path dest) throws IOException {
