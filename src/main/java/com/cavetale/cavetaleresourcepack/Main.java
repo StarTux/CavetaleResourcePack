@@ -125,9 +125,12 @@ public final class Main {
         buildDefaultFont(dest);
         copyFontJson(SOURCE, dest, "assets/minecraft/font/default.json");
         // Pack it up
-        Path zipPath = Paths.get("target/Cavetale.zip");
+        final Path zipPath = Paths.get("target/Cavetale.zip");
+        final Path sha1Path = Paths.get("target/Cavetale.zip.sha1");
         zip(zipPath, dest);
-        sha1sum(zipPath, Paths.get("target/Cavetale.zip.sha1"));
+        String sha1 = sha1sum(zipPath, sha1Path);
+        Files.createSymbolicLink(Paths.get("target/" + sha1 + ".zip"), Paths.get("Cavetale.zip"));
+        Files.createSymbolicLink(Paths.get("target/" + sha1 + ".zip.sha1"), Paths.get("Cavetale.zip.sha1"));
     }
 
     static void buildMytemModels(Path dest) throws IOException {
@@ -577,7 +580,7 @@ public final class Main {
         }
     }
 
-    static void sha1sum(final Path source, final Path target) throws IOException {
+    private static String sha1sum(final Path source, final Path target) throws IOException {
         try {
             byte[] b = Files.readAllBytes(source);
             byte[] hash = MessageDigest.getInstance("SHA-1").digest(b);
@@ -586,6 +589,7 @@ public final class Main {
             if (verbose) {
                 System.err.println("sha1sum " + result);
             }
+            return result;
         } catch (NoSuchAlgorithmException nsa) {
             throw new IllegalArgumentException(nsa);
         }
