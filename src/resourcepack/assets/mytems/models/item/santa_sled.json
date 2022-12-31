@@ -2318,6 +2318,11 @@
 		}
 	],
 	"display": {
+		"gui": {
+			"rotation": [45, -135, 0],
+			"translation": [0, 2.75, 0],
+			"scale": [1.25, 1.25, 1.25]
+		},
 		"head": {
 			"translation": [0, 10, -4],
 			"scale": [4, 4, 4]
