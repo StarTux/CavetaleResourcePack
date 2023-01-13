@@ -60,12 +60,14 @@ public final class Main {
             + "\n OPTIONS"
             + "\n -o --obfuscate  Obfuscate the output"
             + "\n -v --verbose    Verbose output"
-            + "\n --vanillaitems  Make vanilla items";
+            + "\n --vanillaitems  Make vanilla items"
+            + "\n --makegif PNG SCALE	Make a gif";
         System.out.println(usage);
     }
 
     static boolean run(String[] args) throws IOException {
-        for (String arg : args) {
+        for (int i = 0; i < args.length; i += 1) {
+            String arg = args[i];
             if (arg.startsWith("--")) {
                 switch (arg.substring(2)) {
                 case "obfuscate":
@@ -77,12 +79,16 @@ public final class Main {
                 case "vanillaitems":
                     doMakeVanillaItems = true;
                     break;
+                case "makegif":
+                    if (i != 0 || args.length != 3) return false;
+                    GifMaker.makeGif(args[i + 1], Integer.parseInt(args[i + 2]));
+                    return true;
                 default:
                     return false;
                 }
             } else if (arg.startsWith("-")) {
-                for (int i = 1; i < arg.length(); i += 1) {
-                    char c = arg.charAt(i);
+                for (int j = 1; j < arg.length(); j += 1) {
+                    char c = arg.charAt(j);
                     switch (c) {
                     case 'o':
                         doObfuscate = true;
