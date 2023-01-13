@@ -51,6 +51,10 @@ public final class Json {
         return GSON.toJson(obj);
     }
 
+    public static String prettyPrint(Object obj) {
+        return PRETTY.toJson(obj);
+    }
+
     public static <T> T deserialize(String json, Class<T> type) {
         return GSON.fromJson(json, type);
     }

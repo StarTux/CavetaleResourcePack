@@ -10,7 +10,7 @@ import lombok.Data;
 @Data @AllArgsConstructor
 public final class PackPath {
     protected String namespace; // e.g. minecraft, mytems
-    protected String folder; // e.g. models, textures
+    protected String folder; // e.g. item, block OR models, textures
     protected String filename; // e.g. player_head, dr_acula_staff
 
     public static PackPath fromString(String str) {

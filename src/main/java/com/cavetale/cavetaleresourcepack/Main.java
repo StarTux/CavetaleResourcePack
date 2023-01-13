@@ -48,6 +48,7 @@ public final class Main {
     static int nextRandomFile;
     static Path vanillaPath = null;
     static final Path SOURCE = Path.of("src/resourcepack");
+    static final Path DEST = Paths.get("target/resourcepack");
 
     private Main() { }
 
@@ -127,6 +128,7 @@ public final class Main {
         buildMytemModels(dest);
         buildDefaultFont(dest);
         copyFontJson(SOURCE, dest, "assets/minecraft/font/default.json");
+        buildMytemsAnimations();
         // Pack it up
         final Path zipPath = Paths.get("target/Cavetale.zip");
         final Path sha1Path = Paths.get("target/Cavetale.zip.sha1");
@@ -276,6 +278,27 @@ public final class Main {
         }
     }
 
+    static void buildMytemsAnimations() {
+        for (Mytems mytems : Mytems.values()) {
+            if (mytems.animation == null) continue;
+            AnimationJson.Container json = AnimationJson.ofMytemsAnimation(mytems.animation);
+            PackPath packPath = PackPath.mytems("item", mytems.id);
+            if (doObfuscate) packPath = texturePathMap.getOrDefault(packPath, packPath);
+            Path path = DEST.resolve(packPath.toPath("textures", ".png.mcmeta"));
+            if (Files.isRegularFile(path)) {
+                System.err.println("Animation Exists: " + mytems + ", " + path);
+                AnimationJson.Container orig = Json.load(path.toFile(), AnimationJson.Container.class);
+                orig.animation.normalize();
+                if (!orig.equals(json)) {
+                    System.err.println(Json.serialize(orig));
+                    System.err.println(Json.serialize(json));
+                }
+            }
+            Json.save(path.toFile(), json, !doObfuscate);
+            System.out.println("Animated " + mytems + ": " + path);
+        }
+    }
+
     static void buildDefaultFont(Path dest) throws IOException {
         Path fontDest = dest.resolve("assets/cavetale/font");
         Files.createDirectories(fontDest);
@@ -300,15 +323,15 @@ public final class Main {
                 BufferedImage image = textureImageMap.get(clearPackPath);
                 if (image.getWidth() == image.getHeight()) {
                     it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
-                } else if (mytems.animation.length > 1) {
+                } else if (mytems.characters.length > 1) {
                     int ratio = image.getHeight() / image.getWidth();
-                    if (mytems.animation.length != ratio) {
-                        throw new IllegalStateException(mytems + ": " + mytems.animation.length + " != " + ratio);
+                    if (mytems.characters.length != ratio) {
+                        throw new IllegalStateException(mytems + ": " + mytems.characters.length + " != " + ratio);
                     }
                     int w = image.getWidth() / 2;
                     System.out.println("buildDefaultFont animation " + clearPackPath + ": " + ratio + ":1, " + w);
                     List<String> list = new ArrayList<>(ratio);
-                    for (char chr : mytems.animation) {
+                    for (char chr : mytems.characters) {
                         list.add("" + chr);
                     }
                     it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);

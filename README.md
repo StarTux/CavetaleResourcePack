@@ -18,3 +18,12 @@ frame.  Exceptions will be hardcoded here.
 
 The distinguishing legacy file name `item_name_animated.png` is no
 longer required.
+
+Where the mcmeta file is absent in the source resourcepack for an
+animated Mytems texture, it will be synthesized provided the Mytems
+enum provides an Animation instance.
+
+## Build Default Font
+
+TODO write me a procedure so I don't forget each time a new version is
+released.

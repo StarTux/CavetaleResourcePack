@@ -1,0 +1,3 @@
+#!/bin/bash
+mvn clean package exec:java -Dexec.args="'-vo' vanilla" &&
+cp -v target/Cavetale.zip ~/.minecraft/resourcepacks/
