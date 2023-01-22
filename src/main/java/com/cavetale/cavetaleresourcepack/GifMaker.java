@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 public final class GifMaker {
@@ -26,7 +28,12 @@ public final class GifMaker {
         final int width = image.getWidth();
         final int count = image.getHeight() / width;
         int fileIndex = 0;
-        for (Object o : mcmeta.frames) {
+        List<Object> frames = mcmeta.frames;
+        if (frames == null) {
+            frames = new ArrayList<>();
+            for (int i = 0; i < count; i+= 1) frames.add(i);
+        }
+        for (Object o : frames) {
             final int frame;
             final int ticks;
             if (o instanceof Number n) {
