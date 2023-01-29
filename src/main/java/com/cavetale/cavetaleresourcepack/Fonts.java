@@ -29,6 +29,9 @@ public final class Fonts {
         List<FontProviderJson> list = new ArrayList<>();
         Map<String, FontProviderJson> filenameMap = new HashMap<>();
         for (Font it : fontClass.getEnumConstants()) {
+            if ((int) it.getCharacter() < 0xE000) {
+                System.err.println(it + ": Character out of range: 0x" + Integer.toHexString((int) it.getCharacter()));
+            }
             FontProviderJson json = filenameMap.get(it.getFilename());
             if (json != null && it.getHeight() > 0) {
                 json.getChars().add("" + it.getCharacter());

@@ -31,7 +31,7 @@ public final class GifMaker {
         List<Object> frames = mcmeta.frames;
         if (frames == null) {
             frames = new ArrayList<>();
-            for (int i = 0; i < count; i+= 1) frames.add(i);
+            for (int i = 0; i < count; i += 1) frames.add(i);
         }
         for (Object o : frames) {
             final int frame;
@@ -60,4 +60,6 @@ public final class GifMaker {
         }
         System.out.println("Wrote " + count + " images to " + destFolder);
     }
+
+    private GifMaker() { }
 }

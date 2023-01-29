@@ -1,6 +1,6 @@
 {
-    "menu.game": "\uE000",
-    "menu.returnToGame": "\uE001 Back to \uE000",
+    "menu.game": "\uE1A4",
+    "menu.returnToGame": "\uE200 Back to \uE1A4",
     "multiplayer.unsecureserver.toast.title": "",
     "multiplayer.unsecureserver.toast": ""
 }
