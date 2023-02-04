@@ -122,7 +122,6 @@ public final class Main {
         // Copy required files
         copyJson(SOURCE, dest, "pack.mcmeta");
         copyPng(SOURCE, dest, "pack.png");
-        copyPng(SOURCE, dest, "assets/minecraft/textures/gui/toasts.png");
         for (String lang : LANG) {
             copyJson(SOURCE.resolve("assets/minecraft/lang/en_us.json"),
                      dest.resolve("assets/minecraft/lang/" + lang + ".json"));
@@ -705,7 +704,13 @@ public final class Main {
 
     static BufferedImage copyPng(final Path source, final Path dest) throws IOException {
         Files.createDirectories(dest.getParent());
-        BufferedImage image = ImageIO.read(source.toFile());
+        BufferedImage image;
+        try {
+            image = ImageIO.read(source.toFile());
+        } catch (IOException ioe) {
+            System.err.println(source);
+            throw new RuntimeException(ioe);
+        }
         if (!doObfuscate) {
             Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
             return image;
