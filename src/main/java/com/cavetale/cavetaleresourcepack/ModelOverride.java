@@ -14,6 +14,7 @@ public final class ModelOverride implements Comparable<ModelOverride> {
     protected Double bowPulling;
     protected Double bowPull;
     protected Double blocking;
+    protected Double angle;
 
     @Override
     public int compareTo(ModelOverride other) {

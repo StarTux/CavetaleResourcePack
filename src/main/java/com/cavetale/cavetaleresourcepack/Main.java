@@ -250,6 +250,42 @@ public final class Main {
                 ModelOverride shieldBlockingOverride = new ModelOverride(mytems.customModelData, shieldBlockingModelPath);
                 shieldBlockingOverride.setBlocking(1.0);
                 materialOverridesMap.get(mytems.material).add(shieldBlockingOverride);
+            } else if (mytems.material == Material.COMPASS || mytems.material == Material.RECOVERY_COMPASS) {
+                // Compass in all directions
+                System.out.println("Compass: " + mytems);
+                int compassCount = 0;
+                int j = 0;
+                for (int i = 0; i < 360; i += 1) {
+                    PackPath compassTexturePath = PackPath.mytemsItem(mytems.id + "_" + i);
+                    if (!texturePathMap.containsKey(compassTexturePath)) continue;
+                    PackPath compassModelPath = PackPath.mytemsItem(mytems.id + "_" + i);
+                    if (doObfuscate) compassTexturePath = texturePathMap.getOrDefault(compassTexturePath, compassTexturePath);
+                    boolean modelExists = modelPathMap.containsKey(compassModelPath);
+                    if (doObfuscate) compassModelPath = modelPathMap.getOrDefault(compassModelPath, compassModelPath);
+                    if (!modelExists) { // make model if necessary
+                        if (doObfuscate) {
+                            PackPath tmp = PackPath.mytemsItem(randomFileName());
+                            modelPathMap.put(compassModelPath, tmp);
+                            compassModelPath = tmp;
+                        }
+                        ModelJson compassModelJson = new ModelJson();
+                        compassModelJson.parent = "item/generated";
+                        compassModelJson.setTexture("layer0", compassTexturePath.toString());
+                        Path compassModelDest = dest.resolve(compassModelPath.toPath("models", ".json"));
+                        Files.createDirectories(compassModelDest.getParent());
+                        Json.save(compassModelDest.toFile(), compassModelJson, !doObfuscate);
+                    }
+                    ModelOverride compassOverride = new ModelOverride(mytems.customModelData, compassModelPath);
+                    compassOverride.setAngle(((double) i + (double) j) / 2.0 / 360.0);
+                    materialOverridesMap.get(mytems.material).add(compassOverride);
+                    j = i;
+                    compassCount += 1;
+                }
+                if (compassCount > 0) {
+                    ModelOverride compassOverride = new ModelOverride(mytems.customModelData, modelPackPath);
+                    compassOverride.setAngle((360.0 + (double) j) / 2.0 / 360.0);
+                    materialOverridesMap.get(mytems.material).add(compassOverride);
+                }
             }
         }
         for (Map.Entry<Material, List<ModelOverride>> entry : materialOverridesMap.entrySet()) {

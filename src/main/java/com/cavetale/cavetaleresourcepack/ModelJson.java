@@ -42,6 +42,9 @@ public final class ModelJson {
             if (override.blocking != null) {
                 obj.predicate.put("blocking", override.blocking);
             }
+            if (override.angle != null) {
+                obj.predicate.put("angle", override.angle);
+            }
             obj.model = override.item.toString();
             newOverrides.add(obj);
         }
