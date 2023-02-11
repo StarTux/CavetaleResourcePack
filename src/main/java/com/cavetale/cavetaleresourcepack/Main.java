@@ -256,9 +256,10 @@ public final class Main {
                 int compassCount = 0;
                 int j = 0;
                 for (int i = 0; i < 360; i += 1) {
-                    PackPath compassTexturePath = PackPath.mytemsItem(mytems.id + "_" + i);
+                    String istring = String.format("%03d", i);
+                    PackPath compassTexturePath = PackPath.mytemsItem(mytems.id + "_" + istring);
                     if (!texturePathMap.containsKey(compassTexturePath)) continue;
-                    PackPath compassModelPath = PackPath.mytemsItem(mytems.id + "_" + i);
+                    PackPath compassModelPath = PackPath.mytemsItem(mytems.id + "_" + istring);
                     if (doObfuscate) compassTexturePath = texturePathMap.getOrDefault(compassTexturePath, compassTexturePath);
                     boolean modelExists = modelPathMap.containsKey(compassModelPath);
                     if (doObfuscate) compassModelPath = modelPathMap.getOrDefault(compassModelPath, compassModelPath);
