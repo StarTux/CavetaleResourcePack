@@ -165,13 +165,16 @@ public final class Main {
             } else if (mytems.material == Material.SHIELD) {
                 PackPath path = PackPath.of("mytems", "item", "template_shield");
                 modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
+            } else if (mytems.category == MytemsCategory.FLAG) {
+                PackPath path = PackPath.of("mytems", "item", "template_flag");
+                modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
             } else if (isHandheld(mytems)) {
                 modelJson.parent = new PackPath("minecraft", "item", "handheld").toString();
             } else {
                 modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
             }
             // Put in the (maybe obfuscated) texture file paths
-            PackPath texturePath = texturePathMap.get(PackPath.mytemsItem(mytems.id + "_animated"));
+            PackPath texturePath = texturePathMap.get(PackPath.mytemsItem(mytems.id + "_item"));
             if (texturePath == null) texturePath = texturePathMap.get(PackPath.mytemsItem(mytems.id));
             if (texturePath == null) throw new NullPointerException("null: " + PackPath.mytemsItem(mytems.id));
             if (mytems.material == Material.END_ROD) {
@@ -363,7 +366,7 @@ public final class Main {
                 if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
                 FontProviderJson it;
                 BufferedImage image = textureImageMap.get(clearPackPath);
-                if (image.getWidth() == image.getHeight()) {
+                if (image.getWidth() >= image.getHeight()) {
                     it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
                 } else if (mytems.characters.length > 1) {
                     int ratio = image.getHeight() / image.getWidth();
@@ -419,7 +422,7 @@ public final class Main {
                 if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
                 FontProviderJson it;
                 BufferedImage image = textureImageMap.get(clearPackPath);
-                if (image.getWidth() == image.getHeight()) {
+                if (image.getWidth() >= image.getHeight()) {
                     if ((int) mytems.character < 0xE000) {
                         System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) mytems.character));
                     }
