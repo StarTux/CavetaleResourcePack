@@ -1,0 +1,18 @@
+{
+    "parent": "mytems:item/template_wings",
+    "textures": {
+	"wings": "mytems:item/butterfly_wings"
+    },
+    "display": {
+	"thirdperson_righthand": {
+	    "rotation": [67, 0, 0],
+	    "translation": [-6, -13.75, 13.25],
+	    "scale": [1.25, 1.25, 1.25]
+	},
+	"thirdperson_lefthand": {
+	    "rotation": [67, 0, 0],
+	    "translation": [-6, -13.75, 13.25],
+	    "scale": [1.25, 1.25, 1.25]
+	}
+    }
+}

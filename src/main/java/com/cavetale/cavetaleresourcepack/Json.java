@@ -2,6 +2,7 @@ package com.cavetale.cavetaleresourcepack;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -27,6 +28,8 @@ public final class Json {
             return dfl.get();
         } catch (IOException ioe) {
             throw new IllegalStateException("Loading " + file, ioe);
+        } catch (JsonSyntaxException jse) {
+            throw new IllegalStateException("Loading " + file, jse);
         }
     }
 
