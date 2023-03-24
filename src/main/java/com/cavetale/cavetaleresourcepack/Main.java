@@ -168,6 +168,8 @@ public final class Main {
             } else if (mytems.category == MytemsCategory.FLAG) {
                 PackPath path = PackPath.of("mytems", "item", "template_flag");
                 modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
+            } else if (mytems.category == MytemsCategory.CAVEBOY) {
+                modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
             } else if (isHandheld(mytems)) {
                 modelJson.parent = new PackPath("minecraft", "item", "handheld").toString();
             } else {
