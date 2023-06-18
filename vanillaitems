@@ -1,0 +1,2 @@
+#!/bin/bash
+mvn package exec:java -Dexec.args='--vanillaitems -v vanilla'
