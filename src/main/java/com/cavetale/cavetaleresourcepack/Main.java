@@ -370,6 +370,7 @@ public final class Main {
                 if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
                 FontProviderJson it;
                 BufferedImage image = textureImageMap.get(clearPackPath);
+                if (image == null) throw new NullPointerException("buildMytemsDefaultFont " + mytems + " " + clearPackPath);
                 if (image.getWidth() >= image.getHeight()) {
                     it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
                 } else if (mytems.characters.length > 1) {
