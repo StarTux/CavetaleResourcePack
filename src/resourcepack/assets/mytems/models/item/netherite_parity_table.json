@@ -1,0 +1,13 @@
+{
+    "parent": "minecraft:block/cube",
+    "gui_light": "side",
+    "textures": {
+	"up": "mytems:item/netherite_parity_table_top",
+	"down": "mytems:item/netherite_parity_table_top",
+	"east": "mytems:item/netherite_parity_table",
+	"south": "mytems:item/netherite_parity_table",
+	"west": "mytems:item/netherite_parity_table",
+	"north": "mytems:item/netherite_parity_table",
+	"particle": "mytems:item/netherite_parity_table"
+    }
+}
