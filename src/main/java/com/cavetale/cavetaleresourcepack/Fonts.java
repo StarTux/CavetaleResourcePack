@@ -25,10 +25,11 @@ public final class Fonts {
         return json;
     }
 
-    public static <E extends Enum<E> & Font> List<FontProviderJson> toList(Class<E> fontClass, Map<PackPath, PackPath> pathMap) {
+    public static <E extends Enum<E> & Font> List<FontProviderJson> toList(Class<E> fontClass, Map<PackPath, PackPath> pathMap, boolean all) {
         List<FontProviderJson> list = new ArrayList<>();
         Map<String, FontProviderJson> filenameMap = new HashMap<>();
         for (Font it : fontClass.getEnumConstants()) {
+            if (!all && !it.isEssential()) continue;
             if ((int) it.getCharacter() < 0xE000) {
                 System.err.println(it + ": Character out of range: 0x" + Integer.toHexString((int) it.getCharacter()));
             }

@@ -132,8 +132,8 @@ public final class Main {
         makeTextureFiles(SOURCE, dest, Paths.get("assets/cavetale/textures/font"));
         copyExistingModelFiles(SOURCE, dest, Paths.get("assets/mytems/models/item"));
         buildMytemModels(dest);
-        buildMytemsDefaultFont(dest);
-        buildMinecraftDefaultFont(dest);
+        buildDefaultFont(dest, dest.resolve("assets/cavetale/font"), true);
+        buildDefaultFont(dest, dest.resolve("assets/minecraft/font"), false);
         buildMytemsAnimations();
         // Pack it up
         final Path zipPath = Paths.get("target/Cavetale.zip");
@@ -348,15 +348,15 @@ public final class Main {
         }
     }
 
-    static void buildMytemsDefaultFont(Path dest) throws IOException {
-        Path fontDest = dest.resolve("assets/cavetale/font");
+    static void buildDefaultFont(Path dest, Path fontDest, boolean all) throws IOException {
         Files.createDirectories(fontDest);
         List<FontProviderJson> fontProviderList = new ArrayList<>();
-        fontProviderList.addAll(Fonts.toList(DefaultFont.class, texturePathMap));
-        fontProviderList.addAll(Fonts.toList(VanillaEffects.class, texturePathMap));
-        fontProviderList.addAll(Fonts.toList(VanillaPaintings.class, texturePathMap));
-        fontProviderList.addAll(Fonts.toList(VanillaItems.class, texturePathMap));
+        fontProviderList.addAll(Fonts.toList(DefaultFont.class, texturePathMap, all));
+        fontProviderList.addAll(Fonts.toList(VanillaEffects.class, texturePathMap, all));
+        fontProviderList.addAll(Fonts.toList(VanillaPaintings.class, texturePathMap, all));
+        fontProviderList.addAll(Fonts.toList(VanillaItems.class, texturePathMap, all));
         for (Mytems mytems : Mytems.values()) {
+            if (!all && !mytems.isEssential()) continue;
             if (mytems.character > 0) {
                 PackPath clearPackPath;
                 PackPath packPath;
@@ -371,62 +371,6 @@ public final class Main {
                 FontProviderJson it;
                 BufferedImage image = textureImageMap.get(clearPackPath);
                 if (image == null) throw new NullPointerException("buildMytemsDefaultFont " + mytems + " " + clearPackPath);
-                if (image.getWidth() >= image.getHeight()) {
-                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
-                } else if (mytems.characters.length > 1) {
-                    int ratio = image.getHeight() / image.getWidth();
-                    if (mytems.characters.length != ratio) {
-                        throw new IllegalStateException(mytems + ": " + mytems.characters.length + " != " + ratio);
-                    }
-                    int w = image.getWidth() / 2;
-                    System.out.println("buildDefaultFont animation " + clearPackPath + ": " + ratio + ":1, " + w);
-                    List<String> list = new ArrayList<>(ratio);
-                    for (char chr : mytems.characters) {
-                        list.add("" + chr);
-                    }
-                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
-                } else {
-                    int ratio = image.getHeight() / image.getWidth();
-                    int w = image.getWidth() / 2;
-                    System.out.println("buildDefaultFont " + clearPackPath + ": " + ratio + ":1, " + w);
-                    List<String> list = new ArrayList<>(ratio);
-                    int glyphIndex = mytems.category == MytemsCategory.COIN ? 2 : 0;
-                    for (int i = 0; i < ratio; i += 1) {
-                        list.add(i == glyphIndex
-                                 ? mytems.character + ""
-                                 : "\u0000");
-                    }
-                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
-                }
-                fontProviderList.add(it);
-            }
-        }
-        Collections.sort(fontProviderList);
-        Json.save(fontDest.resolve("default.json").toFile(), FontJson.ofList(fontProviderList), !doObfuscate);
-    }
-
-    static void buildMinecraftDefaultFont(Path dest) throws IOException {
-        Path fontDest = dest.resolve("assets/minecraft/font");
-        Files.createDirectories(fontDest);
-        List<FontProviderJson> fontProviderList = new ArrayList<>();
-        fontProviderList.addAll(Fonts.toList(DefaultFont.class, texturePathMap));
-        fontProviderList.addAll(Fonts.toList(VanillaEffects.class, texturePathMap));
-        fontProviderList.addAll(Fonts.toList(VanillaPaintings.class, texturePathMap));
-        fontProviderList.addAll(Fonts.toList(VanillaItems.class, texturePathMap));
-        for (Mytems mytems : Mytems.values()) {
-            if (mytems.character > 0) {
-                PackPath clearPackPath;
-                PackPath packPath;
-                switch (mytems) {
-                default:
-                    clearPackPath = PackPath.mytemsItem(mytems.id);
-                    packPath = doObfuscate
-                        ? texturePathMap.get(clearPackPath)
-                        : clearPackPath;
-                }
-                if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
-                FontProviderJson it;
-                BufferedImage image = textureImageMap.get(clearPackPath);
                 if (image.getWidth() >= image.getHeight()) {
                     if ((int) mytems.character < 0xE000) {
                         System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) mytems.character));
