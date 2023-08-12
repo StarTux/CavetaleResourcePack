@@ -167,7 +167,8 @@ public final class Main {
                 PackPath path = PackPath.of("mytems", "item", "template_shield");
                 modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
             } else if (mytems.category == MytemsCategory.COUNTRY_FLAG
-                       || mytems.category == MytemsCategory.PRIDE_FLAGS) {
+                       || mytems.category == MytemsCategory.PRIDE_FLAGS
+                       || mytems.category == MytemsCategory.FUN_FLAGS) {
                 PackPath path = PackPath.of("mytems", "item", "template_flag");
                 modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
             } else if (mytems.category == MytemsCategory.CAVEBOY) {
