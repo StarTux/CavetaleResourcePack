@@ -171,6 +171,9 @@ public final class Main {
                        || mytems.category == MytemsCategory.FUN_FLAGS) {
                 PackPath path = PackPath.of("mytems", "item", "template_flag");
                 modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
+            } else if (mytems == Mytems.MOM) {
+                PackPath path = PackPath.of("mytems", "item", "template_tattoo");
+                modelJson.parent = modelPathMap.getOrDefault(path, path).toString();
             } else if (mytems.category == MytemsCategory.CAVEBOY) {
                 modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
             } else if (isHandheld(mytems)) {
