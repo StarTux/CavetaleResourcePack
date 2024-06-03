@@ -768,33 +768,34 @@ public final class Main {
         List<Material> list = Arrays.asList(Material.values());
         Collections.sort(list, (a, b) -> a.name().compareTo(b.name()));
         for (Material material : list) {
-            if (!material.isItem()) continue;
-            if (material.isLegacy()) continue;
-            if (material.isAir()) continue;
+            if (material.name().startsWith("LEGACY_")) continue;
+            if (material == Material.AIR || material == Material.CAVE_AIR || material == Material.VOID_AIR) continue;
             VanillaItems vanillaItems = VanillaItems.of(material);
+            Path path = null;
             if (vanillaItems != null) {
                 PackPath packPath = PackPath.fromString(vanillaItems.getFilename());
-                Path path = vanillaPath.resolve(packPath.toPath("textures", ".png"));
+                path = vanillaPath.resolve(packPath.toPath("textures", ".png"));
                 if (!Files.isRegularFile(path)) {
                     System.err.println("//" + vanillaItems + " seems wrong: " + vanillaItems.getFilename() + " / " + packPath.toString());
+                    path = null;
                 }
             }
-            Path path;
             String key = material.getKey().getKey();
-            switch (material) {
-            case TNT: path = vanillaPath.resolve("assets/minecraft/textures/item/tnt_side.png"); break;
-            case CLOCK: path = vanillaPath.resolve("assets/minecraft/textures/item/clock_00.png"); break;
-            case COMPASS: path = vanillaPath.resolve("assets/minecraft/textures/item/compass_16.png"); break;
-            case RECOVERY_COMPASS: path = vanillaPath.resolve("assets/minecraft/textures/item/recovery_compass_16.png"); break;
-            case SMALL_DRIPLEAF: path = vanillaPath.resolve("assets/minecraft/textures/block/small_dripleaf_stem_bottom.png"); break;
-            case BIG_DRIPLEAF: path = vanillaPath.resolve("assets/minecraft/textures/block/big_dripleaf_top.png"); break;
-            case SMOOTH_RED_SANDSTONE: path = vanillaPath.resolve("assets/minecraft/textures/block/red_sandstone_top.png"); break;
-            case SMOOTH_SANDSTONE: path = vanillaPath.resolve("assets/minecraft/textures/block/sandstone_top.png"); break;
-            case SMOOTH_QUARTZ: path = vanillaPath.resolve("assets/minecraft/textures/block/quartz_block_bottom.png"); break;
-            case STICKY_PISTON: path = vanillaPath.resolve("assets/minecraft/textures/block/piston_top_sticky.png"); break;
-            case LECTERN: path = vanillaPath.resolve("assets/minecraft/textures/block/lectern_top.png"); break;
-            default:
-                path = vanillaPath.resolve("assets/minecraft/textures/item/" + key + ".png");
+            if (path == null) {
+                path = switch (material) {
+                case TNT -> vanillaPath.resolve("assets/minecraft/textures/item/tnt_side.png");
+                case CLOCK -> vanillaPath.resolve("assets/minecraft/textures/item/clock_00.png");
+                case COMPASS -> vanillaPath.resolve("assets/minecraft/textures/item/compass_16.png");
+                case RECOVERY_COMPASS -> vanillaPath.resolve("assets/minecraft/textures/item/recovery_compass_16.png");
+                case SMALL_DRIPLEAF -> vanillaPath.resolve("assets/minecraft/textures/block/small_dripleaf_stem_bottom.png");
+                case BIG_DRIPLEAF -> vanillaPath.resolve("assets/minecraft/textures/block/big_dripleaf_top.png");
+                case SMOOTH_RED_SANDSTONE -> vanillaPath.resolve("assets/minecraft/textures/block/red_sandstone_top.png");
+                case SMOOTH_SANDSTONE -> vanillaPath.resolve("assets/minecraft/textures/block/sandstone_top.png");
+                case SMOOTH_QUARTZ -> vanillaPath.resolve("assets/minecraft/textures/block/quartz_block_bottom.png");
+                case STICKY_PISTON -> vanillaPath.resolve("assets/minecraft/textures/block/piston_top_sticky.png");
+                case LECTERN -> vanillaPath.resolve("assets/minecraft/textures/block/lectern_top.png");
+                default -> vanillaPath.resolve("assets/minecraft/textures/item/" + key + ".png");
+                };
             }
             if (!Files.isRegularFile(path)) path = null;
             if (path != null) {
@@ -830,14 +831,16 @@ public final class Main {
             }
             int scale = image.getHeight() / image.getWidth();
             PackPath packPath = PackPath.fromPath(vanillaPath.relativize(path));
+            int character;
             if (vanillaItems != null) {
                 if (!vanillaItems.filename.equals(packPath.toString())) {
                     System.err.println("// " + vanillaItems + " Changed: " + vanillaItems.getFilename() + " => " + packPath.toString());
                 }
-                continue;
+                character = (int) vanillaItems.character;
+            } else {
+                character = min++;
             }
-            int character = min++;
-            System.out.println(material + "(Material." + material
+            System.out.println("    " + material + "(Material." + material
                                + ", \"" + packPath.toString()
                                + "\", 8, 8, " + scale + ", '\\u" + Integer.toHexString(character).toUpperCase() + "'),");
         }
