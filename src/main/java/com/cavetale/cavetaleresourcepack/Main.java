@@ -794,6 +794,8 @@ public final class Main {
                 case SMOOTH_QUARTZ -> vanillaPath.resolve("assets/minecraft/textures/block/quartz_block_bottom.png");
                 case STICKY_PISTON -> vanillaPath.resolve("assets/minecraft/textures/block/piston_top_sticky.png");
                 case LECTERN -> vanillaPath.resolve("assets/minecraft/textures/block/lectern_top.png");
+                case SUSPICIOUS_SAND -> vanillaPath.resolve("assets/minecraft/textures/block/suspicious_sand_3.png");
+                case SUSPICIOUS_GRAVEL -> vanillaPath.resolve("assets/minecraft/textures/block/suspicious_gravel_3.png");
                 default -> vanillaPath.resolve("assets/minecraft/textures/item/" + key + ".png");
                 };
             }
