@@ -1,7 +1,5 @@
 {
     "menu.game": "\uE1A9",
     "menu.returnToGame": "Back to \uE1A4",
-    "menu.disconnect": "\uE240 Be back later",
-    "multiplayer.unsecureserver.toast.title": "",
-    "multiplayer.unsecureserver.toast": ""
+    "menu.disconnect": "\uE240 Be back later"
 }
