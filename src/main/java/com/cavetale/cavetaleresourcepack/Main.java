@@ -122,7 +122,6 @@ public final class Main {
         // Copy required files
         copyJson(SOURCE, dest, "pack.mcmeta");
         copyPng(SOURCE, dest, "pack.png");
-        copyPng(SOURCE, dest, "assets/minecraft/textures/gui/toasts.png");
         for (String lang : LANG) {
             copyJson(SOURCE.resolve("assets/minecraft/lang/en_us.json"),
                      dest.resolve("assets/minecraft/lang/" + lang + ".json"));
