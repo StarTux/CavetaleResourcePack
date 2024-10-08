@@ -1,7 +1,0 @@
-{
-    "parent": "item/potion",
-    "textures": {
-	"layer0": "mytems:item/potion_flask_overlay",
-	"layer1": "mytems:item/potion_flask"
-    }
-}

@@ -189,6 +189,17 @@ public final class Main {
             } else {
                 modelJson.setTexture("layer0", texturePath.toString());
                 if (mytems.material.name().startsWith("LEATHER_")) {
+                    // Leather armor has the uncolored overlay on the 1 layer
+                    PackPath overlayPath = texturePathMap.get(PackPath.mytemsItem(mytems.id + "_overlay"));
+                    if (overlayPath != null) {
+                        modelJson.setTexture("layer1", overlayPath.toString());
+                    }
+                } else if (mytems.material == Material.POTION) {
+                    // Potions have the colored overlay on the 0 layer.
+                    PackPath overlayPath = texturePathMap.get(PackPath.mytemsItem(mytems.id + "_overlay"));
+                    if (overlayPath != null) {
+                        modelJson.setTexture("layer0", overlayPath.toString());
+                    }
                     modelJson.setTexture("layer1", texturePath.toString());
                 }
             }
