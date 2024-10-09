@@ -1,0 +1,46 @@
+{
+	"credit": "Made with Blockbench",
+        "parent": "mytems:item/template_wings",
+	"textures": {
+		"0": "mytems:item/vampire_wings",
+		"particle": "mytems:item/vampire_wings"
+	},
+	"elements": [
+		{
+			"from": [11, 0, 0],
+			"to": [28, 16, 0],
+			"rotation": {"angle": 22.5, "axis": "y", "origin": [24, 1, 6]},
+			"faces": {
+				"north": {"uv": [0, 16, 16, 0], "texture": "#0"},
+				"east": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#0"},
+				"south": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#0"},
+				"west": {"uv": [0, 0, 16, 16], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#0"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#0"}
+			}
+		},
+		{
+			"from": [-11, 0, -1],
+			"to": [6, 16, -1],
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [-10, 1, 5]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#0"},
+				"east": {"uv": [0, 0, 16, 16], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [0, 16, 16, 0], "texture": "#0"},
+				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#0"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"down": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_lefthand": {
+			"rotation": [-111, 0, 0],
+			"translation": [-5.55, -2.25, 8.75]
+		},
+	        "gui": {
+		    "rotation": [180, 0, 0],
+	            "scale": [0.5, 0.5, 0.5]
+	        }
+	}
+}
