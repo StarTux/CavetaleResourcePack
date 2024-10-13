@@ -1,6 +1,6 @@
 {
 	"credit": "Made with Blockbench",
-        "parent": "mytems:item/template_wings",
+	"parent": "mytems:item/template_wings",
 	"textures": {
 		"0": "mytems:item/vampire_wings",
 		"particle": "mytems:item/vampire_wings"
@@ -34,13 +34,17 @@
 		}
 	],
 	"display": {
+		"thirdperson_righthand": {
+			"rotation": [-111, 0, 0],
+			"translation": [-6.55, -2.25, 8.75]
+		},
 		"thirdperson_lefthand": {
 			"rotation": [-111, 0, 0],
 			"translation": [-5.55, -2.25, 8.75]
 		},
-	        "gui": {
-		    "rotation": [180, 0, 0],
-	            "scale": [0.5, 0.5, 0.5]
-	        }
+		"gui": {
+			"rotation": [180, 0, 0],
+			"scale": [0.5, 0.5, 0.5]
+		}
 	}
 }
