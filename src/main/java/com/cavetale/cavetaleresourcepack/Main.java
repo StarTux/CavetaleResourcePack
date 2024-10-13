@@ -177,6 +177,8 @@ public final class Main {
                 modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
             } else if (isHandheld(mytems)) {
                 modelJson.parent = new PackPath("minecraft", "item", "handheld").toString();
+            } else if (mytems.material == Material.MACE) {
+                modelJson.parent = new PackPath("minecraft", "item", "handheld_mace").toString();
             } else {
                 modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
             }
