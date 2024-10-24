@@ -160,6 +160,7 @@ public final class Main {
             if (Files.isRegularFile(modelSource)) continue; // Already done in copyExistingModelFiles()
             // Generate a model json file
             ModelJson modelJson = new ModelJson();
+            // Decide the parent
             if (mytems == Mytems.UNICORN_HORN) {
                 modelJson.parent = PackPath.of("minecraft", "block", "end_rod").toString();
             } else if (mytems.material == Material.SHIELD) {
@@ -183,14 +184,24 @@ public final class Main {
                 modelJson.parent = new PackPath("minecraft", "item", "generated").toString();
             }
             // Put in the (maybe obfuscated) texture file paths
-            PackPath texturePath = texturePathMap.get(PackPath.mytemsItem(mytems.id + "_item"));
+            PackPath texturePath;
+            if (mytems.category == MytemsCategory.MUSICAL_NOTE) {
+                texturePath = texturePathMap.get(PackPath.mytemsItem("musical_note"));
+            } else {
+                texturePath = texturePathMap.get(PackPath.mytemsItem(mytems.id + "_item"));
+            }
             if (texturePath == null) texturePath = texturePathMap.get(PackPath.mytemsItem(mytems.id));
             if (texturePath == null) throw new NullPointerException("null: " + PackPath.mytemsItem(mytems.id));
+            // Figure out layered textures
             if (mytems.material == Material.END_ROD) {
                 modelJson.setTexture("end_rod", texturePath.toString());
             } else {
                 modelJson.setTexture("layer0", texturePath.toString());
-                if (mytems.material.name().startsWith("LEATHER_")) {
+                if (mytems.category == MytemsCategory.MUSICAL_NOTE) {
+                    PackPath overlayPath = texturePathMap.get(PackPath.mytemsItem(mytems.id));
+                    if (overlayPath == null) throw new NullPointerException("MUSICAL_NOTE overlay is. null: " + PackPath.mytemsItem(mytems.id));
+                    modelJson.setTexture("layer1", overlayPath.toString());
+                } else if (mytems.material.name().startsWith("LEATHER_")) {
                     // Leather armor has the uncolored overlay on the 1 layer
                     PackPath overlayPath = texturePathMap.get(PackPath.mytemsItem(mytems.id + "_overlay"));
                     if (overlayPath != null) {
