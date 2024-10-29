@@ -384,58 +384,54 @@ public final class Main {
         fontProviderList.addAll(Fonts.toList(VanillaItems.class, texturePathMap, all));
         for (Mytems mytems : Mytems.values()) {
             if (!all && !mytems.isEssential()) continue;
-            if (mytems.character > 0) {
-                PackPath clearPackPath;
-                PackPath packPath;
-                switch (mytems) {
-                default:
-                    clearPackPath = PackPath.mytemsItem(mytems.id);
-                    packPath = doObfuscate
-                        ? texturePathMap.get(clearPackPath)
-                        : clearPackPath;
+            if (mytems.character == 0) continue;
+            final PackPath clearPackPath;
+            final PackPath packPath;
+            clearPackPath = PackPath.mytemsItem(mytems.id);
+            packPath = doObfuscate
+                ? texturePathMap.get(clearPackPath)
+                : clearPackPath;
+            if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
+            FontProviderJson it;
+            BufferedImage image = textureImageMap.get(clearPackPath);
+            if (image == null) throw new NullPointerException("buildMytemsDefaultFont " + mytems + " " + clearPackPath);
+            if (image.getWidth() >= image.getHeight()) {
+                if ((int) mytems.character < 0xE000) {
+                    System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) mytems.character));
                 }
-                if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
-                FontProviderJson it;
-                BufferedImage image = textureImageMap.get(clearPackPath);
-                if (image == null) throw new NullPointerException("buildMytemsDefaultFont " + mytems + " " + clearPackPath);
-                if (image.getWidth() >= image.getHeight()) {
-                    if ((int) mytems.character < 0xE000) {
-                        System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) mytems.character));
-                    }
-                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
-                } else if (mytems.characters.length > 1) {
-                    int ratio = image.getHeight() / image.getWidth();
-                    if (mytems.characters.length != ratio) {
-                        throw new IllegalStateException(mytems + ": " + mytems.characters.length + " != " + ratio);
-                    }
-                    int w = image.getWidth() / 2;
-                    System.out.println("buildDefaultFont animation " + clearPackPath + ": " + ratio + ":1, " + w);
-                    List<String> list = new ArrayList<>(ratio);
-                    for (char chr : mytems.characters) {
-                        if ((int) chr < 0xE000) {
-                            System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) chr));
-                        }
-                        list.add("" + chr);
-                    }
-                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
-                } else {
-                    if ((int) mytems.character < 0xE000) {
-                        System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) mytems.character));
-                    }
-                    int ratio = image.getHeight() / image.getWidth();
-                    int w = image.getWidth() / 2;
-                    System.out.println("buildDefaultFont " + clearPackPath + ": " + ratio + ":1, " + w);
-                    List<String> list = new ArrayList<>(ratio);
-                    int glyphIndex = mytems.category == MytemsCategory.COIN ? 2 : 0;
-                    for (int i = 0; i < ratio; i += 1) {
-                        list.add(i == glyphIndex
-                                 ? mytems.character + ""
-                                 : "\u0000");
-                    }
-                    it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
+                it = new FontProviderJson("bitmap", packPath.toString() + ".png", 8, 8, List.of(mytems.character + ""));
+            } else if (mytems.characters.length > 1) {
+                int ratio = image.getHeight() / image.getWidth();
+                if (mytems.characters.length != ratio) {
+                    throw new IllegalStateException(mytems + ": " + mytems.characters.length + " != " + ratio);
                 }
-                fontProviderList.add(it);
+                int w = image.getWidth() / 2;
+                System.out.println("buildDefaultFont animation " + clearPackPath + ": " + ratio + ":1, " + w);
+                List<String> list = new ArrayList<>(ratio);
+                for (char chr : mytems.characters) {
+                    if ((int) chr < 0xE000) {
+                        System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) chr));
+                    }
+                    list.add("" + chr);
+                }
+                it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
+            } else {
+                if ((int) mytems.character < 0xE000) {
+                    System.err.println(mytems + ": Character out of range: 0x" + Integer.toHexString((int) mytems.character));
+                }
+                int ratio = image.getHeight() / image.getWidth();
+                int w = image.getWidth() / 2;
+                System.out.println("buildDefaultFont " + clearPackPath + ": " + ratio + ":1, " + w);
+                List<String> list = new ArrayList<>(ratio);
+                int glyphIndex = mytems.category == MytemsCategory.COIN ? 2 : 0;
+                for (int i = 0; i < ratio; i += 1) {
+                    list.add(i == glyphIndex
+                             ? mytems.character + ""
+                             : "\u0000");
+                }
+                it = new FontProviderJson("bitmap", packPath.toString() + ".png", w, w, list);
             }
+            fontProviderList.add(it);
         }
         Collections.sort(fontProviderList);
         Json.save(fontDest.resolve("default.json").toFile(), FontJson.ofList(fontProviderList), !doObfuscate);
