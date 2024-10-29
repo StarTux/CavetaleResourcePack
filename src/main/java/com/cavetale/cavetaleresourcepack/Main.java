@@ -385,10 +385,10 @@ public final class Main {
         for (Mytems mytems : Mytems.values()) {
             if (!all && !mytems.isEssential()) continue;
             if (mytems.character == 0) continue;
-            final PackPath clearPackPath;
-            final PackPath packPath;
-            clearPackPath = PackPath.mytemsItem(mytems.id);
-            packPath = doObfuscate
+            PackPath clearPackPath;
+            clearPackPath = PackPath.mytemsItem(mytems.id + "_font");
+            if (!texturePathMap.containsKey(clearPackPath)) clearPackPath = PackPath.mytemsItem(mytems.id);
+            final PackPath packPath = doObfuscate
                 ? texturePathMap.get(clearPackPath)
                 : clearPackPath;
             if (packPath == null) throw new NullPointerException(mytems + ": packPath=null");
