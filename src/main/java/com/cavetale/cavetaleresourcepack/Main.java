@@ -815,6 +815,8 @@ public final class Main {
                 case LECTERN -> vanillaPath.resolve("assets/minecraft/textures/block/lectern_top.png");
                 case SUSPICIOUS_SAND -> vanillaPath.resolve("assets/minecraft/textures/block/suspicious_sand_3.png");
                 case SUSPICIOUS_GRAVEL -> vanillaPath.resolve("assets/minecraft/textures/block/suspicious_gravel_3.png");
+                case TRIAL_SPAWNER -> vanillaPath.resolve("assets/minecraft/textures/block/trial_spawner_side_inactive.png");
+                case DECORATED_POT -> vanillaPath.resolve("assets/minecraft/textures/entity/decorated_pot/decorated_pot_side.png");
                 default -> vanillaPath.resolve("assets/minecraft/textures/item/" + key + ".png");
                 };
             }
