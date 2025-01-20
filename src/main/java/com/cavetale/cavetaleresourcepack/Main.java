@@ -1,11 +1,13 @@
 package com.cavetale.cavetaleresourcepack;
 
+import com.cavetale.cavetaleresourcepack.itemmodel.*;
 import com.cavetale.core.font.DefaultFont;
 import com.cavetale.core.font.VanillaEffects;
 import com.cavetale.core.font.VanillaItems;
 import com.cavetale.core.font.VanillaPaintings;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsCategory;
+import com.cavetale.mytems.item.pocketmob.PocketMobType;
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,12 +45,12 @@ public final class Main {
     static boolean doMakeVanillaItems = false;
     static Map<PackPath, PackPath> texturePathMap = new HashMap<>();
     static Map<PackPath, PackPath> modelPathMap = new HashMap<>();
-    static Map<Material, List<ModelOverride>> materialOverridesMap = new HashMap<>();
     static Map<PackPath, BufferedImage> textureImageMap = new HashMap<>();
     static int nextRandomFile;
     static Path vanillaPath = null;
     static final Path SOURCE = Path.of("src/resourcepack");
     static final Path DEST = Paths.get("target/resourcepack");
+    static final Path MYTEMS_ITEMS = DEST.resolve("assets/mytems/items");
 
     private Main() { }
 
@@ -119,6 +121,7 @@ public final class Main {
     static void makeResourcePack() throws IOException {
         Path dest = Paths.get("target/resourcepack");
         Files.createDirectories(dest);
+        Files.createDirectories(MYTEMS_ITEMS);
         // Copy required files
         copyJson(SOURCE, dest, "pack.mcmeta");
         copyPng(SOURCE, dest, "pack.png");
@@ -143,13 +146,25 @@ public final class Main {
         Files.copy(sha1Path, Paths.get("target/" + sha1 + ".zip.sha1"));
     }
 
+    /**
+     * Build all the items models and the corresponding items model
+     * files, new in 1.21.4.
+     *
+     * See https://minecraft.wiki/w/Items_model_definition
+     * See https://www.minecraft.net/en-us/article/minecraft-java-edition-1-21-4
+     */
     static void buildMytemModels(Path dest) throws IOException {
         for (Mytems mytems : Mytems.values()) {
+            final Path itemsModelPath = MYTEMS_ITEMS.resolve(mytems.id + ".json");
+            final ItemsModel itemsModel = new ItemsModel();
             if (mytems.category == MytemsCategory.POCKET_MOB) {
                 PackPath packPath = PackPath.mytemsItem("pocket_mob");
                 if (doObfuscate) packPath = modelPathMap.get(packPath);
-                materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
-                    .add(new ModelOverride(mytems.customModelData, packPath));
+                final ItemModelModel itemModel = itemsModel.makeModel(packPath.toString());
+                final PocketMobType type = PocketMobType.of(mytems);
+                itemModel.addDyeTint(type.layer0 | 0xff000000);
+                itemModel.addDyeTint(type.layer1 | 0xff000000);
+                Json.save(itemsModelPath.toFile(), itemsModel, !doObfuscate);
                 continue;
             }
             if (mytems.customModelData == null) continue;
@@ -199,7 +214,7 @@ public final class Main {
                 modelJson.setTexture("layer0", texturePath.toString());
                 if (mytems.category == MytemsCategory.MUSICAL_NOTE) {
                     PackPath overlayPath = texturePathMap.get(PackPath.mytemsItem(mytems.id));
-                    if (overlayPath == null) throw new NullPointerException("MUSICAL_NOTE overlay is. null: " + PackPath.mytemsItem(mytems.id));
+                    if (overlayPath == null) throw new NullPointerException("MUSICAL_NOTE overlay is null: " + PackPath.mytemsItem(mytems.id));
                     modelJson.setTexture("layer1", overlayPath.toString());
                 } else if (mytems.material.name().startsWith("LEATHER_")) {
                     // Leather armor has the uncolored overlay on the 1 layer
@@ -230,15 +245,18 @@ public final class Main {
             Path modelDest = dest.resolve(modelPackPath.toPath("models", ".json"));
             Files.createDirectories(modelDest.getParent());
             Json.save(modelDest.toFile(), modelJson, !doObfuscate);
-            materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
-                .add(new ModelOverride(mytems.customModelData, modelPackPath));
             if (mytems.material == Material.BOW) {
                 // Bow pulling special case
                 System.out.println("Bow: " + mytems);
-                double[] pulls = {0.0, 0.65, 0.9};
-                for (int i = 0; i < pulls.length; i += 1) {
+                final ItemModelRangeDispatchUseDuration useDuration = itemsModel.makeUseDuration();
+                // 100 is a magic number
+                // We simply probe a few pulling numbers.  This is not
+                // elegant but it should work.
+                for (int i = 0; i < 100; i += 1) {
                     PackPath bowPullingTexturePath = PackPath.mytemsItem(mytems.id + "_pulling_" + i);
-                    if (!texturePathMap.containsKey(bowPullingTexturePath)) break; // texture must exist!
+                    if (!texturePathMap.containsKey(bowPullingTexturePath)) {
+                        continue;
+                    }
                     PackPath bowPullingModelPath = PackPath.mytemsItem(mytems.id + "_pulling_" + i);
                     if (doObfuscate) bowPullingTexturePath = texturePathMap.getOrDefault(bowPullingTexturePath, bowPullingTexturePath);
                     boolean modelExists = modelPathMap.containsKey(bowPullingModelPath);
@@ -256,11 +274,9 @@ public final class Main {
                         Files.createDirectories(bowPullingModelDest.getParent());
                         Json.save(bowPullingModelDest.toFile(), bowPullingModelJson, !doObfuscate);
                     }
-                    ModelOverride bowPullingOverride = new ModelOverride(mytems.customModelData, bowPullingModelPath);
-                    bowPullingOverride.setBowPulling(1.0);
-                    if (i != 0) bowPullingOverride.setBowPull(pulls[i]);
-                    materialOverridesMap.get(mytems.material).add(bowPullingOverride);
+                    useDuration.addModelEntry((float) i, bowPullingModelPath.toString());
                 }
+                useDuration.setFallback(new ItemModelModel(modelPackPath.toString()));
             } else if (mytems.material == Material.SHIELD) {
                 // Shield blocking
                 System.out.println("Shield: " + mytems);
@@ -281,12 +297,17 @@ public final class Main {
                     Files.createDirectories(shieldBlockingModelDest.getParent());
                     Json.save(shieldBlockingModelDest.toFile(), shieldBlockingModelJson, !doObfuscate);
                 }
-                ModelOverride shieldBlockingOverride = new ModelOverride(mytems.customModelData, shieldBlockingModelPath);
-                shieldBlockingOverride.setBlocking(1.0);
-                materialOverridesMap.get(mytems.material).add(shieldBlockingOverride);
-            } else if (mytems.material == Material.COMPASS || mytems.material == Material.RECOVERY_COMPASS) {
+                final ItemModelCondition condition = itemsModel.makeCondition();
+                condition.setUsingItem();
+                condition.setOnFalse(new ItemModelModel(modelPackPath.toString()));
+                condition.setOnTrue(new ItemModelModel(shieldBlockingModelPath.toString()));
+            } else if (mytems.material == Material.COMPASS) {
                 // Compass in all directions
                 System.out.println("Compass: " + mytems);
+                final ItemModelRangeDispatchCompass compass = itemsModel.makeCompass();
+                compass.setScale(360f);
+                compass.setFallback(new ItemModelModel(modelPackPath.toString()));
+                compass.setLodestone();
                 int compassCount = 0;
                 int j = 0;
                 for (int i = 0; i < 360; i += 1) {
@@ -310,47 +331,26 @@ public final class Main {
                         Files.createDirectories(compassModelDest.getParent());
                         Json.save(compassModelDest.toFile(), compassModelJson, !doObfuscate);
                     }
-                    ModelOverride compassOverride = new ModelOverride(mytems.customModelData, compassModelPath);
-                    compassOverride.setAngle(((double) i + (double) j) / 2.0 / 360.0);
-                    materialOverridesMap.get(mytems.material).add(compassOverride);
+                    compass.addModelEntry(((float) i + (float) j) * 0.5f,
+                                          compassModelPath.toString());
                     j = i;
                     compassCount += 1;
                 }
-                if (compassCount > 0) {
-                    ModelOverride compassOverride = new ModelOverride(mytems.customModelData, modelPackPath);
-                    compassOverride.setAngle((360.0 + (double) j) / 2.0 / 360.0);
-                    materialOverridesMap.get(mytems.material).add(compassOverride);
-                }
-            }
-        }
-        for (Map.Entry<Material, List<ModelOverride>> entry : materialOverridesMap.entrySet()) {
-            Material material = entry.getKey();
-            String modelPath = "assets/minecraft/models/item/" + material.getKey().getKey() + ".json";
-            Path modelDest = dest.resolve(modelPath);
-            Path modelSource = SOURCE.resolve(modelPath); // pre-written vanilla model
-            if (Files.isRegularFile(modelSource)) {
-                ModelJson minecraftModel = Json.load(modelSource.toFile(), ModelJson.class, ModelJson::new);
-                for (ModelJson.OverrideJson override : minecraftModel.overrides) {
-                    PackPath overrideModelPath = PackPath.fromString(override.model);
-                    PackPath obfuscated = modelPathMap.get(overrideModelPath);
-                    if (obfuscated != null) {
-                        override.model = obfuscated.toString();
-                    }
-                }
-                Files.createDirectories(modelDest.getParent());
-                Json.save(modelDest.toFile(), minecraftModel, !doObfuscate);
             } else {
-                modelSource = vanillaPath.resolve(modelPath);
-                if (!Files.isRegularFile(modelSource)) {
-                    System.err.println("File not found: " + modelSource);
+                final ItemModelModel model = itemsModel.makeModel(modelPackPath.toString());
+                if (mytems == Mytems.POTION_FLASK) {
+                    model.addPotionTint(0xff000000);
+                    model.addConstantTint(0xffffffff);
+                } else if (mytems.category == MytemsCategory.UI_COLOR) {
+                    model.addDyeTint(0xffffffff);
+                } else if (mytems.category == MytemsCategory.MUSICAL_NOTE) {
+                    model.addDyeTint(0xffffffff);
+                    model.addConstantTint(0xffffffff);
+                } else if (mytems.category == MytemsCategory.GEM_SLOT) {
+                    model.addDyeTint(0xffffffff);
                 }
-                ModelJson minecraftModel = Json.load(modelSource.toFile(), ModelJson.class, ModelJson::new);
-                List<ModelOverride> overrides = entry.getValue();
-                Collections.sort(overrides);
-                minecraftModel.addOverrides(overrides);
-                Files.createDirectories(modelDest.getParent());
-                Json.save(modelDest.toFile(), minecraftModel, !doObfuscate);
             }
+            Json.save(itemsModelPath.toFile(), itemsModel, !doObfuscate);
         }
     }
 
@@ -576,9 +576,10 @@ public final class Main {
             if (verbose) {
                 System.out.println("copyExistingModelFiles2 " + path + " : " + mytems);
             }
-            if (mytems != null && mytems.material != null) {
-                materialOverridesMap.computeIfAbsent(mytems.material, m -> new ArrayList<>())
-                    .add(new ModelOverride(mytems.customModelData, modelPackPath));
+            if (mytems != null) {
+                final Path itemsModelPath = MYTEMS_ITEMS.resolve(mytems.id + ".json");
+                final ItemsModel itemsModel = new ItemsModel().model(modelPackPath.toString());
+                Json.save(itemsModelPath.toFile(), itemsModel, !doObfuscate);
             }
         }
     }
