@@ -7,6 +7,7 @@ import com.cavetale.core.font.VanillaItems;
 import com.cavetale.core.font.VanillaPaintings;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsCategory;
+import com.cavetale.mytems.MytemsTag;
 import com.cavetale.mytems.item.pocketmob.PocketMobType;
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
@@ -578,7 +579,11 @@ public final class Main {
             }
             if (mytems != null) {
                 final Path itemsModelPath = MYTEMS_ITEMS.resolve(mytems.id + ".json");
-                final ItemsModel itemsModel = new ItemsModel().model(modelPackPath.toString());
+                final ItemsModel itemsModel = new ItemsModel();
+                final ItemModelModel itemModel = itemsModel.makeModel(modelPackPath.toString());
+                if (MytemsTag.FURNITURE.isTagged(mytems)) {
+                    itemModel.addDyeTint(0xff_ff_ff_ff);
+                }
                 Json.save(itemsModelPath.toFile(), itemsModel, !doObfuscate);
             }
         }

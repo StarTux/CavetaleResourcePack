@@ -1,0 +1,16 @@
+#!/bin/bash
+whitefile=$1
+if [ -z "$whitefile" ]; then
+    echo Usage: $0 FILE >&2
+    exit 1
+fi
+COLORS="light_gray gray black brown red orange yellow lime green cyan light_blue blue purple magenta pink"
+dir=`dirname $whitefile`
+basename $whitefile | sed 's/\.json$//g' | tr '[:lower:]' '[:upper:]'
+for i in $COLORS; do
+    file=`basename $whitefile | sed "s/white/$i/g"`
+    echo $file | sed 's/\.json$//g' | tr '[:lower:]' '[:upper:]'
+    dest=$dir/$file
+    cp $whitefile $dest
+    sed -i "s/white_wool/${i}_wool/g" $dest
+done

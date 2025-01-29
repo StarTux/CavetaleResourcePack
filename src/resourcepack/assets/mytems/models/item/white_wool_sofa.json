@@ -1,5 +1,5 @@
 {
-	"parent": "mytems:item/template_sofa_left",
+	"parent": "mytems:item/template_sofa",
 	"textures": {
 		"cover": "minecraft:block/white_wool"
 	}

@@ -1,5 +1,5 @@
 {
-    "parent": "mytems:item/template_small_armor_stand_block",
+    "parent": "mytems:item/template_furniture",
     "textures": {
 	"lid": "block/stripped_dark_oak_log",
 	"particle": "block/white_concrete",

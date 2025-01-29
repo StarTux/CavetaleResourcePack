@@ -3,6 +3,7 @@ package com.cavetale.cavetaleresourcepack;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.ToNumberPolicy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -12,8 +13,8 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public final class Json {
-    public static final Gson GSON = new GsonBuilder().create();
-    public static final Gson PRETTY = new GsonBuilder().setPrettyPrinting().create();
+    public static final Gson GSON = new GsonBuilder().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create();
+    public static final Gson PRETTY = new GsonBuilder().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).setPrettyPrinting().create();
     private static final Pattern SIMPLE = Pattern.compile("[0-9a-zA-Z_-]+");
 
     private Json() { }
