@@ -3,6 +3,7 @@
 	"gui_light": "side",
 	"display": {
 		"thirdperson_righthand": {
+		        "translation": [0, 1, 0],
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"ground": {
@@ -14,8 +15,8 @@
 			"scale": [0.75, 0.75, 0.75]
 		},
 		"head": {
-			"translation": [0, -14.65, 0],
-			"scale": [2.2855, 2.2855, 2.2855]
+			"translation": [0, 14, 0],
+			"scale": [1, 1, 1]
 		},
 		"fixed": {
 			"translation": [0, 0, -8]
