@@ -1,4 +1,4 @@
-package com.cavetale.cavetaleresourcepack;
+package com.cavetale.cavetaleresourcepack.itemmodel;
 
 import java.util.ArrayList;
 import java.util.List;

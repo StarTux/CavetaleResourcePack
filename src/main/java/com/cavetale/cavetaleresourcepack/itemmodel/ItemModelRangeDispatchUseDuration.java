@@ -1,8 +1,5 @@
-package com.cavetale.cavetaleresourcepack;
+package com.cavetale.cavetaleresourcepack.itemmodel;
 
-import java.util.ArrayList;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Setter

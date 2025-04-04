@@ -1,8 +1,5 @@
-package com.cavetale.cavetaleresourcepack;
+package com.cavetale.cavetaleresourcepack.itemmodel;
 
-import java.util.ArrayList;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Setter
@@ -22,15 +19,15 @@ public class ItemModelCondition extends ItemModel {
         this.property = property;
     }
 
-    public void setUsingItem() {
+    public final void setUsingItem() {
         property = "using_item";
     }
 
-    public void setOnTrue(final ItemModel model) {
+    public final void setOnTrue(final ItemModel model) {
         this.on_true = model;
     }
 
-    public void setOnFalse(final ItemModel model) {
+    public final void setOnFalse(final ItemModel model) {
         this.on_false = model;
     }
 }

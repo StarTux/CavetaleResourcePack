@@ -1,4 +1,4 @@
-package com.cavetale.cavetaleresourcepack;
+package com.cavetale.cavetaleresourcepack.itemmodel;
 
 import java.io.Serializable;
 import lombok.RequiredArgsConstructor;

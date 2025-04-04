@@ -1,4 +1,4 @@
-package com.cavetale.cavetaleresourcepack;
+package com.cavetale.cavetaleresourcepack.itemmodel;
 
 public final class TintSourceConstant extends TintSource {
     private int value = 0xffffff;

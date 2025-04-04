@@ -1,4 +1,4 @@
-package com.cavetale.cavetaleresourcepack;
+package com.cavetale.cavetaleresourcepack.itemmodel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class ItemModelRangeDispatch extends ItemModel {
         public final ItemModel model;
     }
 
-    public void addModelEntry(float threshold, String modelPath) {
+    public final void addModelEntry(float threshold, String modelPath) {
         entries.add(new Entry(threshold, new ItemModelModel(modelPath)));
     }
 }

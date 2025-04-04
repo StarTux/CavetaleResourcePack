@@ -1,4 +1,4 @@
-package com.cavetale.cavetaleresourcepack;
+package com.cavetale.cavetaleresourcepack.itemmodel;
 
 import com.google.gson.annotations.SerializedName;
 
