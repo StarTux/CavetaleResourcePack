@@ -8,6 +8,7 @@ import com.cavetale.core.font.VanillaPaintings;
 import com.cavetale.mytems.Mytems;
 import com.cavetale.mytems.MytemsCategory;
 import com.cavetale.mytems.MytemsTag;
+import com.cavetale.mytems.farming.GrowthStage;
 import com.cavetale.mytems.item.pocketmob.PocketMobType;
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
@@ -138,6 +139,7 @@ public final class Main {
         buildDefaultFont(dest, dest.resolve("assets/cavetale/font"), true);
         buildDefaultFont(dest, dest.resolve("assets/minecraft/font"), false);
         buildMytemsAnimations();
+        buildFarming();
         // Pack it up
         final Path zipPath = Paths.get("target/Cavetale.zip");
         final Path sha1Path = Paths.get("target/Cavetale.zip.sha1");
@@ -872,6 +874,43 @@ public final class Main {
             System.out.println("    " + material + "(Material." + material
                                + ", \"" + packPath.toString()
                                + "\", 8, 8, " + scale + ", '\\u" + Integer.toHexString(character).toUpperCase() + "'),");
+        }
+    }
+
+    private static void buildFarming() throws IOException {
+        for (GrowthStage growthStage : GrowthStage.values()) {
+            final String key = growthStage.name().toLowerCase();
+            final Path imgSrc = Path.of("src/farming/" + growthStage.getFarmingPlantType().name().toLowerCase() + "/" + key + ".png");
+            final PackPath packPath = PackPath.mytemsItem(key);
+            final PackPath packPathValue = doObfuscate ? packPath.withName(randomFileName()) : packPath;
+            texturePathMap.put(packPath, packPathValue);
+            final Path imgDst = DEST.resolve(packPathValue.toPath("textures", ".png"));
+            copyPng(imgSrc, imgDst);
+            // Model
+            final ModelJson modelJson = new ModelJson();
+            modelJson.parent = switch (growthStage.getModel()) {
+            case X -> "minecraft:block/cross";
+            case XTALL -> {
+                PackPath path = PackPath.mytemsItem("billboard_x_tall");
+                if (doObfuscate) path = modelPathMap.getOrDefault(path, path);
+                yield path.toString();
+            }
+            case X3TALL -> {
+                PackPath path = PackPath.mytemsItem("billboard_x_3tall");
+                if (doObfuscate) path = modelPathMap.getOrDefault(path, path);
+                yield path.toString();
+            }
+            default -> "minecraft:block/cross";
+            };
+            modelJson.setTexture("cross", packPathValue.toString());
+            final Path modelDst = DEST.resolve(packPathValue.toPath("models", ".json"));
+            Files.createDirectories(modelDst.getParent());
+            Json.save(modelDst.toFile(), modelJson, !doObfuscate);
+            // Items Model
+            final Path itemsModelPath = MYTEMS_ITEMS.resolve(key + ".json");
+            final ItemsModel itemsModel = new ItemsModel();
+            final ItemModelModel itemModel = itemsModel.makeModel(packPathValue.toString());
+            Json.save(itemsModelPath.toFile(), itemsModel, !doObfuscate);
         }
     }
 
