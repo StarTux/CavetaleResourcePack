@@ -181,6 +181,8 @@ public final class Main {
             // Decide the parent
             if (mytems == Mytems.UNICORN_HORN) {
                 modelJson.parent = PackPath.of("minecraft", "block", "end_rod").toString();
+            } else if (mytems.category == MytemsCategory.GOLF_CLUB) {
+                modelJson.parent = new PackPath("mytems", "item", "golf_club").toString();
             } else if (mytems.material == Material.SHIELD) {
                 PackPath path = PackPath.of("mytems", "item", "template_shield");
                 modelJson.parent = modelPathMap.getOrDefault(path, path).toString();

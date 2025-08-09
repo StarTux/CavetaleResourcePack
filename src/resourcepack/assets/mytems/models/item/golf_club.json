@@ -1,0 +1,22 @@
+{
+    "parent": "item/handheld",
+    "display": {
+	"thirdperson_righthand": {
+	    "rotation": [1, -87, -47],
+	    "translation": [-1.75, 0, -4.75],
+	    "scale": [0.92, 0.92, 0.92]
+	},
+	"thirdperson_lefthand": {
+	    "rotation": [1, 87, 47],
+	    "translation": [-2.25, 0, -4.75],
+	    "scale": [0.92, 0.92, 0.92]
+	},
+	"firstperson_righthand": {
+	    "rotation": [0, -106, 17],
+	    "translation": [0, -2, 0]
+	},
+	"firstperson_lefthand": {
+	    "translation": [0, -8.75, 0]
+	}
+    }
+}
