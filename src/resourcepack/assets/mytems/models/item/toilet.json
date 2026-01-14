@@ -4,7 +4,7 @@
 	"lid": "block/stripped_dark_oak_log",
 	"particle": "block/white_concrete",
 	"bowl": "block/white_concrete",
-	"water": "mytems:item/water_still",
+	"water": "block/light_blue_concrete",
 	"flush": "block/dark_oak_planks",
 	"lid_bottom": "block/stripped_oak_log"
     },
