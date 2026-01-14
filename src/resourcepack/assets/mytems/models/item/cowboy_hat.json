@@ -3,7 +3,7 @@
 	"parent": "mytems:item/template_hat",
 	"textures": {
 		"0": "block/brown_terracotta",
-		"2": "item/lead",
+		"2": "block/brown_wool",
 		"particle": "block/brown_terracotta"
 	},
 	"elements": [
